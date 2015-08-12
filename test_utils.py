@@ -24,9 +24,8 @@ def get_removable(disk):
     return int(subprocess.getoutput("cat /sys/block/{}"""
 
 ## Get information with cat
-def cat_data(fp, pp = None): # fp = full path, pp = partition path
-    if pp == None:
-        return subprocess.getoutput("cat {}".format(fp))
+def cat_data(fp): # fp = full path, pp = partition path
+    return subprocess.getoutput("cat {}".format(fp))
         
 def cat_data_boolean(fp, pp = None):
     if pp == None:
@@ -38,6 +37,11 @@ def cat_data_boolean(fp, pp = None):
 ## Get path with ls
 def ls_path(fp):
     return subprocess.getoutput("ls {}".format(fp))
+
+## Get alloc type
+def get_alloc_type(disk):
+    result = subprocess.getoutput("LANG=c parted -m -s --list 2>/dev/null | grep /dev/{}".format(disk))
+    return result.split(":")[5]
 
 
 ## Check partition size
