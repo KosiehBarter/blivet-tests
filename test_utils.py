@@ -1,7 +1,7 @@
 ### Test utils
 ### Part of: Blivet test collection
 ### Author: kvalek@redhat.com
-### All programs I create are under GPL license.
+### This program is under GPL licence.
 
 import sys
 import subprocess
@@ -27,7 +27,15 @@ def get_removable(disk):
 def cat_data(fp, pp = None): # fp = full path, pp = partition path
     if pp == None:
         return subprocess.getoutput("cat {}".format(fp))
+        
+def cat_data_boolean(fp, pp = None):
+    if pp == None:
+        if int(subprocess.getoutput("cat {}".format(fp))) == 0:
+            return False
+        else:
+            return True
 
+## Get path with ls
 def ls_path(fp):
     return subprocess.getoutput("ls {}".format(fp))
 
