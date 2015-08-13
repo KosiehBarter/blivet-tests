@@ -15,3 +15,8 @@ test_system_formatted = classes.SystemDiskFormatted('vdb')
 test_blivet_formatted = classes.BlivetDiskFormatted('vdb')
 print(test_system_formatted.alloc_type)
 print(test_blivet_formatted.b_alloc_type)
+
+test_system_partition = classes.SystemPartition('vda', 1)
+test_blivet_partition = classes.BlivetPartition('vda', 1)
+
+ia = checker_test_utils.test_properties_partition(test_system_partition, test_blivet_partition)
