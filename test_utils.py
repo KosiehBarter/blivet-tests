@@ -34,6 +34,15 @@ def cat_data_boolean(fp, pp = None):
         else:
             return True
 
+## Get first block of part
+def get_part_block(disk, position):
+    if position == 'first':
+        return int(subprocess.getoutput("tune2fs -l /dev/{} | grep First\ block | sed \'s/First\ block\:\s*//\'".format(disk)))
+    if position == 'last':
+        return (int(subprocess.getoutput("tune2fs -l /dev/{} | grep Block\ count | sed \'s/Block\ count\:\s*//\'".format(disk))) / 1024)
+
+
+
 ## Get path with ls
 def ls_path(fp):
     return subprocess.getoutput("ls {}".format(fp))
@@ -84,6 +93,8 @@ def format_new_partition(partition, filesystem = "ext4"):
 
 def rand_part_size(mds): # max disk size
     return randint(16, mds)
+
+
 
 ## LVM ###############################################################################
 ## Create physical volume
