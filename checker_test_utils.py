@@ -3,7 +3,7 @@
 ### Author: kvalek@redhat.com
 ### This program is under GPL licence.
 
-def test_properties(sys_scan, blv_scan):
+def test_properties_disk(sys_scan, blv_scan):
     lt = ["NAME", "PATH", "REMOVABLE", "VENDOR", "SIZE"]
     ia = []
     ss = [sys_scan.name, sys_scan.system_path, sys_scan.removable, sys_scan.vendor, sys_scan.space]
