@@ -26,7 +26,6 @@ class SystemDisk(object):
         self.removable = test_utils.cat_data_boolean("/sys/block/{}/removable".format(self.name))
         self.vendor = test_utils.cat_data("/sys/block/{}/device/vendor".format(self.name))
         self.space = self.sector_size * self.num_of_sectors
-        self.children = None
 
 
 class SystemDiskFormatted(SystemDisk):
@@ -55,32 +54,39 @@ class SystemPartition(SystemDisk):
         self.name = "{}{}".format(disk, part_num)
         self.system_path = test_utils.ls_path("/dev/{}{}".format(disk, part_num))
         self.part_num_of_sectors = int(test_utils.cat_data("/sys/block/{}/{}{}/size".format(disk, disk, part_num)))
-        self.part_type = 
+        self.part_type = None
         self.part_start = test_utils.get_part_block(self.name, 'first')
         self.part_end = test_utils.get_part_block(self.name, 'last')
-        self.part_sector_size = 
-        self.part_size = self.part_num_of_sectors * self.part_sector_size
-        self.parent = disk
+        self.part_size = self.part_num_of_sectors * self.sector_size
 
 
+class BlivetInitialization(object):
+    """ This basic class initializes Blivet and returns
+    Blivet object, performs Blivet().reset()"""
+    def __init__(self, disk):
+        """
+            Initialize Blivet.
+        """
+        super(BlivetInitialization, self).__init__()
+        self.b_objet = blivet_test_utils.init_blivet()
+        self.b_object.reset()
+        self.b_disk = blivet_test_utils.get_dev_by_name(self.b_object, disk)
 
-class BlivetDisk(object):
+
+class BlivetDisk(BlivetInitialization):
     """ Contains data related to a disk,
         how Blivet recognizes it."""
     def __init__(self, disk):
         """
             :param str disk: disk's name
         """
-        self.b_object = blivet_test_utils.init_blivet()
-        self.b_object.reset()
-        self.b_disk = blivet_test_utils.get_dev_by_name(self.b_object, disk)
+        super(BlivetDisk, self).__init__()
         self.b_name = self.b_disk.name
         self.b_system_path = self.b_disk.path
         self.b_removable = self.b_disk.removable
         self.b_vendor = self.b_disk.vendor
         self.b_model = self.b_disk.model
         self.b_space = int(self.b_disk.size)
-        self.b_children = None
 
 
 class BlivetDiskFormatted(BlivetDisk):
@@ -106,4 +112,4 @@ class BlivetPartition(BlivetDisk):
         self.b_part_size = int(disk.size)
         self.b_part_start = None    # FIXME
         self.b_part_end = None      # FIXME
-        self.b_parent = disk
+        self.b_part_parent = None   # FIXME
