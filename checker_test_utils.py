@@ -21,14 +21,14 @@ def print_properties(ia):
         print(ia[inc])
 
 def test_properties_partition(sys_scan, blv_scan):
-    lt = ["NAME", "PATH", "num_of_sectors", "PART_TYPE", "PART_START", "PART_END"]
+    lt = ["NAME", "PATH", "PART_FORMAT", "PART_MOUNT_POINT", "PART_SIZE", "PART_START", "PART_END"]
     ia = []
-    ss = [sys_scan.name, sys_scan.system_path, sys_scan.num_of_sectors, sys_scan.part_type, sys_scan.part_start, sys_scan.part_end]
-    bs = [blv_scan.name, blv_scan.system_path, blv_scan.num_of_sectors, blv_scan.part_type, blv_scan.part_start, blv_scan.part_end]
+    ss = [sys_scan.part_name, sys_scan.part_system_path, sys_scan.part_format, sys_scan.part_mount_point, sys_scan.part_size, sys_scan.part_start, sys_scan.part_end]
+    bs = [blv_scan.b_part_name, blv_scan.b_part_system_path, blv_scan.b_part_format, blv_scan.b_part_mount_point, blv_scan.b_part_size, blv_scan.b_part_start, blv_scan.b_part_end]
 
     for inc in range(len(ss)):
         if (ss[inc] == bs[inc]):
-            ia.append("PASS: {}\t: {} == {}".format(lt[inc], ss[inc], bs[inc]))
+            ia.append("PASS: {}\t\t: {} == {}".format(lt[inc], ss[inc], bs[inc]))
         else:
-            ia.append("FAIL: {}\t: {} != {}".format(lt[inc], ss[inc], bs[inc]))
+            ia.append("FAIL: {}\t\t: {} != {}".format(lt[inc], ss[inc], bs[inc]))
     return ia
