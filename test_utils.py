@@ -18,7 +18,7 @@ def get_real_disk_size(disk):
     return ((get_sect_size(disk) * get_disk_size(disk)) / (1024 * 1024))
 
 def get_disk_uuid(disk):
-    return 
+    return
 
 def get_removable(disk):
     return int(subprocess.getoutput("cat /sys/block/{}"""
@@ -26,7 +26,8 @@ def get_removable(disk):
 ## Get information with cat
 def cat_data(fp): # fp = full path, pp = partition path
     return subprocess.getoutput("cat {}".format(fp))
-        
+
+## Boolean method of cat_data
 def cat_data_boolean(fp, pp = None):
     if pp == None:
         if int(subprocess.getoutput("cat {}".format(fp))) == 0:
@@ -37,10 +38,18 @@ def cat_data_boolean(fp, pp = None):
 ## Get first block of part
 def get_part_block(disk, position):
     if position == 'first':
-        return int(subprocess.getoutput("tune2fs -l /dev/{} | grep First\ block | sed \'s/First\ block\:\s*//\'".format(disk)))
+        return (int(subprocess.getoutput("LANG=c tune2fs -l /dev/{} | grep First\ block | sed 's/First\ block:\s*//'".format(disk))) * 1024)
     if position == 'last':
-        return (int(subprocess.getoutput("tune2fs -l /dev/{} | grep Block\ count | sed \'s/Block\ count\:\s*//\'".format(disk))) / 1024)
+        return (int(subprocess.getoutput("LANG=c tune2fs -l /dev/{} | grep Block\ count | sed 's/Block\ count:\s*//'".format(disk))) / 1024)
 
+## Get partition's mount point
+def get_part_mount_point(part_name):
+    return subprocess.getoutput("LANG=c tune2fs /dev/{} -l | grep Last\ mounted\ on | sed 's/Last\ mounted\ on:\s*//'".format(part_name))
+
+## Get partition's format
+def get_part_format(part_name):
+    result = subprocess.getoutput("cat /proc/mounts | grep /dev/{}".format(part_name))
+    return result.split(" ")[2]
 
 
 ## Get path with ls
