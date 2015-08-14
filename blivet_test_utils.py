@@ -15,8 +15,8 @@ def get_dev_by_name(blivet_object, disk):
     return blivet_object.devicetree.getDeviceByName(disk)
 
 ## Scan disk kids
-def get_dev_kids(blivet_object, scanned_disk):
-    return blivet_object.devicetree.getChildren(scanned_disk)
+def get_dev_kids(blivet_object, scanned_disk, inc):
+    return blivet_object.devicetree.getChildren(scanned_disk)[inc - 1]
 
 ## Get dev alloc size
 def get_dev_alloc_size(blivet_object, disk):
