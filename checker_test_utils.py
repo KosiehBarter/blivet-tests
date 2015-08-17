@@ -21,10 +21,10 @@ def print_properties(ia):
         print(ia[inc])
 
 def test_properties_partition(sys_scan, blv_scan):
-    lt = ["NAME", "PATH", "PART_FORMAT", "PART_MOUNT_POINT", "PART_SIZE", "PART_START", "PART_END"]
+    lt = ["NAME", "PATH", "PART_FORMAT", "PART_MOUNT_POINT", "PART_SIZE", "PART_START", "PART_END", "UUID"]
     ia = []
-    ss = [sys_scan.part_name, sys_scan.part_system_path, sys_scan.part_format, sys_scan.part_mount_point, sys_scan.part_size, sys_scan.part_start, sys_scan.part_end]
-    bs = [blv_scan.b_part_name, blv_scan.b_part_system_path, blv_scan.b_part_format, blv_scan.b_part_mount_point, blv_scan.b_part_size, blv_scan.b_part_start, blv_scan.b_part_end]
+    ss = [sys_scan.part_name, sys_scan.part_system_path, sys_scan.part_format, sys_scan.part_mount_point, sys_scan.part_size, sys_scan.part_start, sys_scan.part_end, sys_scan.part_uuid]
+    bs = [blv_scan.b_part_name, blv_scan.b_part_system_path, blv_scan.b_part_format, blv_scan.b_part_mount_point, blv_scan.b_part_size, blv_scan.b_part_start, blv_scan.b_part_end, blv_scan.b_part_uuid]
 
     for inc in range(len(ss)):
         if (ss[inc] == bs[inc]):
