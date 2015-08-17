@@ -44,25 +44,33 @@ class SystemDiskFormatted(SystemDisk):
         self.alloc_type = test_utils.get_alloc_type(self.name)
 
 
-class SystemPartitionInitialize(SystemDisk):
-    """ Initializes basic operations needed for partition check-up."""
-    def __init__(self, disk, size):
+class SystemPartitionCreate(SystemDisk):
+    """ Creates specified partition. Used with concordance with
+        SystemPartition. Uses MiB by default"""
+    def __init__(self, disk, part_start, part_end, type_of_size, type_of_part):
         """
-            :param str disk: disk's name
-            :param int partition size in MiB
+             :param str disk: disk name
+             :param int part_start: partition's start sector
+             :param int part_end: partition's end sector
+             :param str type_of_size: Which units should partition use
         """
-        super(SystemPartitionInitialize, self).__init__(disk)
+        super(SystemPartitionCreate, self).__init__(disk)
+        self.cr_part_start = part_start
+        self.cr_part_end = part_end
+        self.cr_part_size = cr_part_end - cr_part_start ## FIXME: untrusted
+        self.cr_part_size_type = type_of_size
+        self.cr_part_type = type_of_part
+        test_utils.create_new_partition(disk, self.cr_part_type, self.cr_part_size_type, self.cr_part_start, self.cr_part_end)
 
 
-class SystemPartition(SystemPartitionInitialize):
+class SystemPartition(SystemDisk):
     """ Contains data regarding to a partition.
         This object defines what is a partition and what kind of data are
         related to a partition."""
-    def __init__(self, disk, part_num, size):
+    def __init__(self, disk, part_num):
         """
             :param str disk: disk's name
             :param int part_num: partition number
-            :param int size: partition size in MiB
         """
         super(SystemPartition, self).__init__(disk)
         self.part_name = "{}{}".format(self.name, part_num)
