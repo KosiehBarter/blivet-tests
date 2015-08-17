@@ -35,13 +35,6 @@ def cat_data_boolean(fp, pp = None):
         else:
             return True
 
-## Get first block of part
-def get_part_block(disk, position):
-    if position == 'first':
-        return (int(subprocess.getoutput("LANG=c tune2fs -l /dev/{} | grep First\ block | sed 's/First\ block:\s*//'".format(disk))) * 1024)
-    if position == 'last':
-        return (int(subprocess.getoutput("LANG=c tune2fs -l /dev/{} | grep Block\ count | sed 's/Block\ count:\s*//'".format(disk))) / 1024)
-
 ## Get partition's mount point
 def get_part_mount_point(part_name):
     return subprocess.getoutput("LANG=c tune2fs /dev/{} -l | grep Last\ mounted\ on | sed 's/Last\ mounted\ on:\s*//'".format(part_name))
@@ -53,8 +46,11 @@ def get_part_format(part_name):
 
 
 ## Get path with ls
-def ls_path(fp):
-    return subprocess.getoutput("ls {}".format(fp))
+def ls_path(fp, grep = None):
+    if grep != None:
+        return subprocess.getoutput("ls -l {} | grep {}".format(fp, grep))
+    else:
+        return subprocess.getoutput("ls {}".format(fp))
 
 ## Get alloc type
 def get_alloc_type(disk):
