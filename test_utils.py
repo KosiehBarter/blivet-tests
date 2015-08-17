@@ -17,9 +17,6 @@ def get_num_of_sectors(disk):
 def get_real_disk_size(disk):
     return ((get_sect_size(disk) * get_disk_size(disk)) / (1024 * 1024))
 
-def get_disk_uuid(disk):
-    return
-
 def get_removable(disk):
     return int(subprocess.getoutput("cat /sys/block/{}"""
 
@@ -41,9 +38,11 @@ def get_part_mount_point(part_name):
 
 ## Get partition's format
 def get_part_format(part_name):
-    result = subprocess.getoutput("cat /proc/mounts | grep /dev/{}".format(part_name))
-    return result.split(" ")[2]
+    # return result = subprocess.getoutput("cat /proc/mounts | grep /dev/{}".format(part_name))
+    return subprocess.getoutput("blkid /dev/{}".format(part_name)).split("\"")[3]
 
+def get_disk_uuid(disk):
+    return subprocess.getoutput("blkid /dev/{}".format(disk)).split("\"")[1]
 
 ## Get path with ls
 def ls_path(fp, grep = None):
