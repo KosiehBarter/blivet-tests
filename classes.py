@@ -44,23 +44,35 @@ class SystemDiskFormatted(SystemDisk):
         self.alloc_type = test_utils.get_alloc_type(self.name)
 
 
-class SystemPartition(SystemDisk):
+class SystemPartitionInitialize(SystemDisk):
+    """ Initializes basic operations needed for partition check-up."""
+    def __init__(self, disk, size):
+        """
+            :param str disk: disk's name
+            :param int partition size in MiB
+        """
+        super(SystemPartitionInitialize, self).__init__(disk)
+
+
+class SystemPartition(SystemPartitionInitialize):
     """ Contains data regarding to a partition.
         This object defines what is a partition and what kind of data are
         related to a partition."""
-    def __init__(self, disk, part_num):
+    def __init__(self, disk, part_num, size):
         """
             :param str disk: disk's name
             :param int part_num: partition number
+            :param int size: partition size in MiB
         """
         super(SystemPartition, self).__init__(disk)
         self.part_name = "{}{}".format(self.name, part_num)
-        self.part_system_path = test_utils.ls_path("/dev/{}{}".format(disk, part_num))
+        self.part_system_path = test_utils.ls_path("/dev/{}".format(self.part_name))
         self.part_num_of_sectors = int(test_utils.cat_data("/sys/block/{}/{}/size".format(self.name, self.part_name)))
         self.part_format = test_utils.get_part_format(self.part_name)
-        self.part_start = test_utils.cat_data("/sys/block/{}/{}/start".format(self.name, self.part_name))
-        self.part_end = self.part_start + self.part_num_of_sectors
+        self.part_start = int(test_utils.cat_data("/sys/block/{}/{}/start".format(self.name, self.part_name)))
+        self.part_end = self.part_start + self.part_num_of_sectors - 1
         self.part_size = self.part_num_of_sectors * self.sector_size
+        self.part_uuid = test_utils.ls_path("/dev/disk/by-uuid/", "{}".format(self.part_name)).split()[8]
         self.part_mount_point = test_utils.get_part_mount_point(self.part_name)
 
 
@@ -115,7 +127,8 @@ class BlivetPartition(BlivetDisk):
         self.b_part_system_path = self.b_part.path
         self.b_part_format = self.b_part.format.type
         self.b_part_size = int(self.b_part.size)
-        self.b_part_start = None    # FIXME
-        self.b_part_end = None      # FIXME
+        self.b_part_start = self.b_part.partedPartition.geometry.start
+        self.b_part_end = self.b_part.partedPartition.geometry.end
+        self.b_part_uuid = self.b_part.format.uuid
         self.b_part_parent = self.b_disk
         self.b_part_mount_point = self.b_part.format.systemMountpoint
