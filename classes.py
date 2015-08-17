@@ -47,20 +47,23 @@ class SystemDiskFormatted(SystemDisk):
 class SystemPartitionCreate(SystemDisk):
     """ Creates specified partition. Used with concordance with
         SystemPartition. Uses MiB by default"""
-    def __init__(self, disk, part_start, part_end, type_of_size, type_of_part):
+    def __init__(self, disk, part_start, part_end, type_of_size, type_of_part, format = False, fs):
         """
              :param str disk: disk name
              :param int part_start: partition's start sector
              :param int part_end: partition's end sector
              :param str type_of_size: Which units should partition use
+             :param Boolean format: Determine if to format the partition or not
+             :param str fs: Only when format = True: what filesystem format should be used. ext4 by default.
         """
         super(SystemPartitionCreate, self).__init__(disk)
         self.cr_part_start = part_start
         self.cr_part_end = part_end
-        self.cr_part_size = cr_part_end - cr_part_start ## FIXME: untrusted
         self.cr_part_size_type = type_of_size
         self.cr_part_type = type_of_part
-        test_utils.create_new_partition(disk, self.cr_part_type, self.cr_part_size_type, self.cr_part_start, self.cr_part_end)
+        test_utils.create_new_partition(self.name, self.cr_part_type, self.cr_part_size_type, self.cr_part_start, self.cr_part_end)
+        # TODO: if(format == True):
+        # TODO    test_utils.format_new_partition()
 
 
 class SystemPartition(SystemDisk):
@@ -80,8 +83,8 @@ class SystemPartition(SystemDisk):
         self.part_start = int(test_utils.cat_data("/sys/block/{}/{}/start".format(self.name, self.part_name)))
         self.part_end = self.part_start + self.part_num_of_sectors - 1
         self.part_size = self.part_num_of_sectors * self.sector_size
-        self.part_uuid = test_utils.ls_path("/dev/disk/by-uuid/", "{}".format(self.part_name)).split()[8]
-        self.part_mount_point = test_utils.get_part_mount_point(self.part_name)
+        self.part_uuid = test_utils.get_disk_uuid(self.part_name)
+        # self.part_mount_point = test_utils.get_part_mount_point(self.part_name) # FIXME: mounted partitions only
 
 
 class BlivetInitialization(object):
@@ -139,4 +142,4 @@ class BlivetPartition(BlivetDisk):
         self.b_part_end = self.b_part.partedPartition.geometry.end
         self.b_part_uuid = self.b_part.format.uuid
         self.b_part_parent = self.b_disk
-        self.b_part_mount_point = self.b_part.format.systemMountpoint
+        # self.b_part_mount_point = self.b_part.format.systemMountpoint FIXME: Mounted partitions only
