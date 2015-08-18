@@ -10,9 +10,7 @@ def test_properties_disk(sys_scan, blv_scan):
     bs = [blv_scan.b_name, blv_scan.b_system_path, blv_scan.b_removable, blv_scan.b_vendor, blv_scan.b_space]
 
     for inc in range(len(ss)):
-        if (ss[inc] == bs[inc]):
-            ia.append("PASS: {}\t: {} == {}".format(lt[inc], ss[inc], bs[inc]))
-        else:
+        if (ss[inc] != bs[inc]):
             ia.append("FAIL: {}\t {} != {}".format(lt[inc], ss[inc], bs[inc]))
     return ia
 
@@ -27,14 +25,10 @@ def test_properties_partition(sys_scan, blv_scan):
     bs = [blv_scan.b_part_name, blv_scan.b_part_system_path, blv_scan.b_part_format, blv_scan.b_part_size, blv_scan.b_part_start, blv_scan.b_part_end, blv_scan.b_part_uuid]
 
     for inc in range(len(ss)):
-        if (ss[inc] == bs[inc]):
-            ia.append("PASS: {}\t\t: {} == {}".format(lt[inc], ss[inc], bs[inc]))
-        else:
+        if (ss[inc] != bs[inc]):
             ia.append("FAIL: {}\t\t: {} != {}".format(lt[inc], ss[inc], bs[inc]))
     return ia
 
 def check_formatting(sys_scan, blv_scan):
-    if(sys_scan.alloc_type == blv_scan.b_alloc_type):
-        print("PASS:\t{} == {}".format(sys_scan.alloc_type, blv_scan.b_alloc_type))
-    else:
-        print("FAIL")
+    if(sys_scan.alloc_type != blv_scan.b_alloc_type):
+        print("FAIL:\t{} != {}".format(sys_scan.alloc_type, blv_scan.b_alloc_type))
