@@ -44,10 +44,10 @@ class SystemDiskFormatted(SystemDisk):
         self.alloc_type = test_utils.get_alloc_type(self.name)
 
 
-class SystemPartitionCreate(SystemDisk):
+class SystemPartitionCreate(SystemDiskFormatted):
     """ Creates specified partition. Used with concordance with
         SystemPartition. Uses MiB by default"""
-    def __init__(self, disk, part_start, part_end, type_of_size, type_of_part, format = False, fs):
+    def __init__(self, disk, part_start, part_end, type_of_size, type_of_part):
         """
              :param str disk: disk name
              :param int part_start: partition's start sector
@@ -62,20 +62,17 @@ class SystemPartitionCreate(SystemDisk):
         self.cr_part_size_type = type_of_size
         self.cr_part_type = type_of_part
         test_utils.create_new_partition(self.name, self.cr_part_type, self.cr_part_size_type, self.cr_part_start, self.cr_part_end)
-        # TODO: if(format == True):
-        # TODO    test_utils.format_new_partition()
 
-
-class SystemPartition(SystemDisk):
+class SystemPartition(SystemPartitionCreate):
     """ Contains data regarding to a partition.
         This object defines what is a partition and what kind of data are
         related to a partition."""
-    def __init__(self, disk, part_num):
+    def __init__(self, disk, part_num, part_start, part_end, type_of_size, type_of_part):
         """
             :param str disk: disk's name
             :param int part_num: partition number
         """
-        super(SystemPartition, self).__init__(disk)
+        super(SystemPartition, self).__init__(disk, part_start, part_end, type_of_size, type_of_part)
         self.part_name = "{}{}".format(self.name, part_num)
         self.part_system_path = test_utils.ls_path("/dev/{}".format(self.part_name))
         self.part_num_of_sectors = int(test_utils.cat_data("/sys/block/{}/{}/size".format(self.name, self.part_name)))
@@ -85,6 +82,18 @@ class SystemPartition(SystemDisk):
         self.part_size = self.part_num_of_sectors * self.sector_size
         self.part_uuid = test_utils.get_disk_uuid(self.part_name)
         # self.part_mount_point = test_utils.get_part_mount_point(self.part_name) # FIXME: mounted partitions only
+
+
+class SystemPartitionFormatted(SystemPartition):
+    """ Performs formatting of specified partition."""
+    def __init__(self, disk, part_num, part_start, part_end, type_of_size, type_of_part, filesystem):
+        """
+            :param str disk: disk name
+            :param int part_num: partition number, eg sda1, sda2, vdb5...
+            :param str filesystem: what file system formatting should be used
+        """
+        super(SystemPartitionFormatted, self).__init__(disk, part_num, part_start, part_end, type_of_size, type_of_part)
+        test_utils.format_new_partition(self.part_name)
 
 
 class BlivetInitialization(object):
