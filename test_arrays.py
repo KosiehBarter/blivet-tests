@@ -16,7 +16,11 @@ print("\nFormatted disk check")
 test_system_formatted = classes.SystemDiskFormatted('vdb')
 test_blivet_formatted = classes.BlivetDiskFormatted('vdb')
 ia = checker_test_utils.check_formatting(test_system_formatted, test_blivet_formatted)
-
+soubor = open("TEST_RESULT", "a+")
+soubor.write("Formatted disk check\n")
+if(ia != None):
+    soubor.write(ia)
+soubor.close()
 
 print("\nPartitioned disk check - Single partition")
 partition_creator = classes.SystemPartitionCreate('vdb', 1, -1, "MiB", "primary")
@@ -24,6 +28,11 @@ test_system_partition = classes.SystemPartition('vdb', 1, 1, -1, "MiB", "primary
 test_blivet_partition = classes.BlivetPartition('vdb', 1)
 ia = checker_test_utils.test_properties_partition(test_system_partition, test_blivet_partition)
 checker_test_utils.print_properties(ia)
+soubor = open("TEST_RESULT", "a+")
+soubor.write("Partitioned disk check - Single partition")
+if(ia != None):
+    soubor.write(ia)
+soubor.close()
 
 print("\nPartitioned disk check - Single Formatted")
 partition_formatter = classes.SystemPartitionFormatted('vdb', 1, 1, -1, "MiB", "primary", "ext4")
@@ -31,3 +40,9 @@ test_system_partition = classes.SystemPartition('vdb', 1, 1, -1, "MiB", "primary
 test_blivet_partition = classes.BlivetPartition('vdb', 1)
 ia = checker_test_utils.test_properties_partition(test_system_partition, test_blivet_partition)
 checker_test_utils.print_properties(ia)
+
+soubor = open("TEST_RESULT", "a+")
+soubor.write("Partitioned disk check - Single Formatted")
+if(ia != None):
+    soubor.write(ia)
+soubor.close()
