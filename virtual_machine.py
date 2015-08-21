@@ -32,9 +32,14 @@ subprocess.call(["virt-install", "--name", "{}".format(mach_name),\
 "--location", "{}".format(full_loc_path),\
 "--ram", "{}".format(ram_size), "-x", "ks={}".format(ks_file_path), "--noreboot"])
 
+
 subprocess.call(["virsh", "start", install_name])
-time.sleep(60)
+time.sleep(20)
 file_list = glob.glob("{}*".format(scp_source))
 for inc in file_list:
-    subprocess.call(["scp", inc, "{}:~".format(install_name)])
+    subprocess.call(["scp", "-i", "/home/kvalek/.ssh/atlas", inc, "192.168.122.2:~"])
 subprocess.call(["virsh", "snapshot-create-as", install_name, "--disk-only", "--atomic"])
+subprocess.call(["ssh", "-i", "/home/kvalek/.ssh/atlas", "root@192.168.122.2", "'python3'","'test_arrays.py'"])
+
+
+### virt-log - projdi si manual na zjisteni IP adresy
