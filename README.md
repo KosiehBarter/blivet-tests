@@ -5,7 +5,7 @@ This package is designed to perform specific tests regarding to Blivet and also 
 Main file is classes.py, where are objects. These objects are created automatically after start. All values are gathered and computed automatically as well as compared.
 
 # How to:
-Run virtual_machine.py as root or with sudo to start automatic machine creation. The machine will be created and automatic kickstart installation will start.
+Run virtual_machine.py as root or with sudo to start automatic machine creation. The machine will be created and automatic kickstart installation will start. The virtual machine is reachable with vncviewer or any vnc client with localhost:0.
 
 After install, there is a automatic dynamic timer, which will wait for installation completion and will initiate tests written in test_arrays.py, which includes classes.py as a object for comparation.
 
