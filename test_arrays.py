@@ -7,14 +7,18 @@ import checker_test_utils
 
 ## Simple function for writting to file.
 def write_issues(action, results):
-    f.open("/root/TEST_RESULT")
+    f = open("/root/TEST_RESULT", "a+")
     if (ia != []):
         f.write("{}\n".format(action))
-        f.write("{}".format(results))
+        for inc in results:
+            f.write(inc)
     else:
-        f.write("{} CHECK OK\n")
+        f.write("{} CHECK OK\n".format(action))
     f.close()
 
+## Zero any file @ start
+f = open("/root/TEST_RESULT", "w")
+f.close()
 
 print("Basic disk check\n")
 test_system = classes.SystemDisk('vdb')
@@ -27,9 +31,6 @@ test_system_formatted = classes.SystemDiskFormatted('vdb')
 test_blivet_formatted = classes.BlivetDiskFormatted('vdb')
 ia = checker_test_utils.check_formatting(test_system_formatted, test_blivet_formatted)
 write_issues("Formatted disk", ia)
-
-print("Partitioned disk check - single")
-
 
 """
 print("\nPartitioned disk check - Single partition")
