@@ -52,10 +52,12 @@ file_list = glob.glob("{}*".format(scp_source))
 # copy files to machine
 for inc in file_list:
     subprocess.call(["scp", "-o", "UserKnownHostsFile=/dev/null", "-o", "StrictHostKeyChecking=no", "-i", "{}".format(key_location), inc, "{}:~".format(vystup.group(1))])
-subprocess.call(["virsh", "snapshot-create", "{}".format(mach_name), "start-snap", "--disk-only", "--atomic"])
+subprocess.call(["virsh snapshot-create-as {} snap-start --atomic".format(mach_name)], shell=True)
 
 # run test
 subprocess.call(["ssh", "-i", "{}".format(key_location), "-o", "StrictHostKeyChecking=no", "root@{}".format(vystup.group(1)), "'python3'","'test_arrays.py'"])
 subprocess.call(["scp", "-i", "{}".format(key_location), "root@{}:/root/TEST_RESULT".format(vystup.group(1)), "./"])
-subprocess.call(["virsh snapshot-revert --domain {} {}".format(mach_name, "start-snap")], shell=True)
+vys = subprocess.call(["virsh snapshot-revert  {} snap-start".format(mach_name)], shell=True)
+if vys != 0:
+    print("*** ERROR: Snapshot failed to revert")
 subprocess.call(["cat", "./TEST_RESULT"])
