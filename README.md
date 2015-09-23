@@ -2,4 +2,4 @@
 
 This package is designed to perform specific tests regarding to Blivet.
 
-# TODO: Complete
+The main file is classes.py, which contains all objects, which are gathered / computed automatically.
