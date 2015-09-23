@@ -30,5 +30,7 @@ def test_properties_partition(sys_scan, blv_scan):
     return ia
 
 def check_formatting(sys_scan, blv_scan):
+    ia = []
     if(sys_scan.alloc_type != blv_scan.b_alloc_type):
-        print("FAIL:\t{} != {}".format(sys_scan.alloc_type, blv_scan.b_alloc_type))
+        ia.append("FAIL:\t{} != {}".format(sys_scan.alloc_type, blv_scan.b_alloc_type))
+    return ia
