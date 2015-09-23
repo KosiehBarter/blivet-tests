@@ -37,11 +37,17 @@ if vys == "":
     "--disk", "{},size=2".format(full_disk_path_2),\
     "--disk", "{},size=2".format(full_disk_path_3),\
     "--location", "{}".format(full_loc_path),\
+    "--graphics", "vnc,listen=0.0.0.0", "--noautoconsole",\
     "--ram", "{}".format(ram_size), "-x", "ks={}".format(ks_file_path), "--noreboot"])
 
+while (subprocess.call(["virsh list | grep {}".format(mach_name)], shell=True) != 1):
+    time.sleep(10)
+
 subprocess.call(["virsh", "start", install_name])
-time.sleep(60)
-ip_address = subprocess.getoutput("virt-log -d f23 | grep bound | tail -n 1")
+while (subprocess.call(["virt-log -d {} | grep bound".format(mach_name)], shell=True) != 0):
+    time.sleep(10)
+
+ip_address = subprocess.getoutput("virt-log -d {} | grep bound | tail -n 1".format(mach_name))
 vystup = re.search(r'.*to\ ([0-9]*.[0-9]*.[0-9*]*.[0-9]*).*', ip_address)
 if vystup:
     print(vystup.group(1))
@@ -61,3 +67,4 @@ vys = subprocess.call(["virsh snapshot-revert  {} snap-start".format(mach_name)]
 if vys != 0:
     print("*** ERROR: Snapshot failed to revert")
 subprocess.call(["cat", "./TEST_RESULT"])
+subprocess.call(["virsh shutdown {}".format(mach_name)], shell=True)
