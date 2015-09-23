@@ -11,4 +11,4 @@ After install, there is a automatic dynamic timer, which will wait for installat
 
 There are several tools, test_utils.py and test_utils_blivet.py. Both files include basic gather tools for system and blivet respectively.
 
-# TODO: Complete after feedback
+# Note: This guide is in development, so tools will be added and there is possibility, that some tools in repository will be changed.
