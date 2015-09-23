@@ -5,26 +5,31 @@
 import classes
 import checker_test_utils
 
-print("Basic disk check")
+## Simple function for writting to file.
+def write_issues(action, results):
+    f.open("/root/TEST_RESULT")
+    if (ia != []):
+        f.write("{}\n".format(action))
+        f.write("{}".format(results))
+    else:
+        f.write("{} CHECK OK\n")
+    f.close()
+
+
+print("Basic disk check\n")
 test_system = classes.SystemDisk('vdb')
 test_blivet = classes.BlivetDisk('vdb')
-
 ia = checker_test_utils.test_properties_disk(test_system, test_blivet)
-soubor = open("/root/TEST_RESULT", "a+")
-soubor.write("Basic disk check\n")
-if(ia != None):
-    soubor.write("{}".format(ia))
-soubor.close()
+write_issues("Basic disk", ia)
 
-print("\nFormatted disk check")
+print("Formatted disk check\n")
 test_system_formatted = classes.SystemDiskFormatted('vdb')
 test_blivet_formatted = classes.BlivetDiskFormatted('vdb')
 ia = checker_test_utils.check_formatting(test_system_formatted, test_blivet_formatted)
-soubor = open("/root/TEST_RESULT", "a+")
-soubor.write("Formatted disk check\n")
-if(ia != None):
-    soubor.write("{}".format(ia))
-soubor.close()
+write_issues("Formatted disk", ia)
+
+print("Partitioned disk check - single")
+
 
 """
 print("\nPartitioned disk check - Single partition")

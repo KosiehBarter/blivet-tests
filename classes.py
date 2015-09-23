@@ -96,6 +96,8 @@ class SystemPartitionFormatted(SystemPartition):
         test_utils.format_new_partition(self.part_name)
 
 
+
+
 class BlivetInitialization(object):
     """ This basic class initializes Blivet and returns
         Blivet object, performs Blivet().reset()"""
