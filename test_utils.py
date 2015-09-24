@@ -21,7 +21,7 @@ def get_removable(disk):
     return int(subprocess.getoutput("cat /sys/block/{}"""
 
 ## Get information with cat
-def cat_data(fp): # fp = full path, pp = partition path
+def cat_data(fp): # fp = full path
     return subprocess.getoutput("cat {}".format(fp))
 
 ## Boolean method of cat_data
