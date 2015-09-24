@@ -43,6 +43,7 @@ if vys == "":
 while (subprocess.call(["virsh list | grep {}".format(mach_name)], shell=True) != 1):
     time.sleep(10)
 
+subprocess.call(["virsh snapshot-create-as {} snap-start --atomic".format(mach_name)], shell=True)
 subprocess.call(["virsh", "start", install_name])
 while (subprocess.call(["virt-log -d {} | grep bound".format(mach_name)], shell=True) != 0):
     time.sleep(10)
@@ -58,7 +59,6 @@ file_list = glob.glob("{}*".format(scp_source))
 # copy files to machine
 for inc in file_list:
     subprocess.call(["scp", "-o", "UserKnownHostsFile=/dev/null", "-o", "StrictHostKeyChecking=no", "-i", "{}".format(key_location), inc, "{}:~".format(vystup.group(1))])
-subprocess.call(["virsh snapshot-create-as {} snap-start --atomic".format(mach_name)], shell=True)
 
 # run test
 subprocess.call(["ssh", "-i", "{}".format(key_location), "-o", "StrictHostKeyChecking=no", "root@{}".format(vystup.group(1)), "'python3'","'test_arrays.py'"])
