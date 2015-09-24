@@ -11,7 +11,7 @@ def write_issues(action, results):
     if (ia != []):
         f.write("{}\n".format(action))
         for inc in results:
-            f.write(inc)
+            f.write("{}\n".format(inc))
     else:
         f.write("{} CHECK OK\n".format(action))
     f.close()
@@ -32,11 +32,15 @@ test_blivet_formatted = classes.BlivetDiskFormatted('vdb')
 ia = checker_test_utils.check_formatting(test_system_formatted, test_blivet_formatted)
 write_issues("Formatted disk", ia)
 
+"""print("Partitioned check")
+test_system_partition = classes.SystemPartition('vdb', 1, 1, -1, 'MiB', 'primary')
+test_blivet_partition = classes.BlivetPartition('vdb', 1)
+ia = checker_test_utils.test_properties_partition(test_system_partition, test_blivet_partition)
+write_issues("Single partition", ia)"""
+
 """
 print("\nPartitioned disk check - Single partition")
-partition_creator = classes.SystemPartitionCreate('vdb', 1, -1, "MiB", "primary")
-test_system_partition = classes.SystemPartition('vdb', 1, 1, -1, "MiB", "primary")
-test_blivet_partition = classes.BlivetPartition('vdb', 1)
+
 ia = checker_test_utils.test_properties_partition(test_system_partition, test_blivet_partition)
 checker_test_utils.print_properties(ia)
 soubor = open("TEST_RESULT", "a+")
