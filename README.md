@@ -13,21 +13,21 @@ There are several tools, test_utils.py and test_utils_blivet.py. Both files incl
 
 Note that in virtual_machine.py, at the begining, there are some constants, which can be altered for your needs.
 A small documentation:
-install_name - name of machine and installation.
-install_disk - a iso, which is used for installation. You can specify your own.
-full_disk_path_1 - same as install_disk, but for disk. You can specify your own, but you have to manually create dirs if needed.
-full_loc_path - same as before.
+* install_name - name of machine and installation.
+* install_disk - a iso, which is used for installation. You can specify your own.
+* full_disk_path_1 - same as install_disk, but for disk. You can specify your own, but you have to manually create dirs if needed.
+* full_loc_path - same as before.
 
-ks_file_path - kickstart file, can be URL or local. URL is preffered.
-key_location - your own ssh key. You have to create your own.
-ram_size - amount of machine memory, in MB.
-scp_source - source for tests, have to be set manually.
+* ks_file_path - kickstart file, can be URL or local. URL is preffered.
+* key_location - your own ssh key. You have to create your own.
+* ram_size - amount of machine memory, in MB.
+* scp_source - source for tests, have to be set manually.
 
 # Depedencies / Requirements:
-python3
-virsh
-virt-install (part of virsh?)
-ssh + scp + ssh-keygen
+* python3
+* virsh
+* virt-install (part of virsh?)
+* ssh + scp + ssh-keygen
 
 
 # Note: This guide is in development, so tools will be added and there is possibility, that some tools in repository will be changed.
