@@ -32,5 +32,7 @@ def test_properties_partition(sys_scan, blv_scan):
 def check_formatting(sys_scan, blv_scan):
     ia = []
     if(sys_scan.alloc_type != blv_scan.b_alloc_type):
-        ia.append("FAIL:\t{} != {}".format(sys_scan.alloc_type, blv_scan.b_alloc_type))
+        ia.append("FAIL:\tALLOC_TYPE\t{} != {}".format(sys_scan.alloc_type, blv_scan.b_alloc_type))
+    if(sys_scan.disk_uuid != blv_scan.b_disk_uuid):
+        ia.append("FAIL:\tDISK_UUID\t{} != {}".format(sys_scan.disk_uuid, blv_scan.b_alloc_type))
     return ia
