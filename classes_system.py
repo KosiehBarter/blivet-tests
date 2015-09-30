@@ -66,3 +66,46 @@ class SystemPartition_Exe(SystemDiskFormatted_Exe):
         self.sd_part_size = int(test_utils.cat_data("/sys/block/{}/{}{}/size".format(self.name, self.sd_part_name))) * self.num_of_sectors
         self.sd_part_start = int(test_utils.cat_data("/sys/block/{}/{}{}/start".format(self.name, self.sd_part_name)))
         self.sd_part_end = self.sd_part_size + 2048
+
+
+class SystemPartitionFormatted_Exe(SystemPartition):
+    """ Docstring here"""
+    def __init__(self, disk, part_num, format):
+        """
+            :param str
+        """
+        super(SystemPartitionFormatted_Exe, self).__init__(disk, part_num)
+        self.sd_part_for_format = None
+        self.sd_part_for_uuid = None
+
+
+class SystemExtended_Exe(SystemDiskFormatted_Exe):
+    """ docstring for SystemExtended_Exe"""
+    def __init__(self, disk):
+        """
+            :param
+        """
+        super(SystemExtended_Exe, self).__init__(disk)
+        self.sd_ex_name = None
+        self.sd_ex_uuid = None
+        self.sd_ex_type = None
+        self.sd_ex_size = None
+        self.sd_ex_strt = None
+        self.sd_ex_end = None
+        self.sd_ex_logv = None
+
+
+class SystemLogical_Exe(SystemExtended_Exe):
+    """ docstring"""
+    def __init__(self, disk, logv_num):
+        """
+            :param
+        """
+        super(SystemLogical_Exe, self).__init__(disk)
+        self.sd_lv_name = None
+        self.sd_lv_uuid = None
+        self.sd_lv_type = None
+        self.sd_lv_size = None
+        self.sd_lv_strt = None
+        self.sd_lv_end = None
+        self.sd_lv_logv = None
