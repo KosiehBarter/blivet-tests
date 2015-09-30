@@ -41,8 +41,8 @@ def get_part_format(part_name):
     # return result = subprocess.getoutput("cat /proc/mounts | grep /dev/{}".format(part_name))
     return subprocess.getoutput("blkid /dev/{}".format(part_name)).split("\"")[3]
 
-def get_disk_uuid(disk):
-    return subprocess.getoutput("blkid /dev/{}".format(disk)).split("\"")[1]
+def get_disk_uuid(disk, typ = 1):
+    return subprocess.getoutput("blkid /dev/{}".format(disk)).split("\"")[typ]
 
 ## Get path with ls
 def ls_path(fp, grep = None):
@@ -79,7 +79,7 @@ def create_new_alloc_table(disk, table_type = "msdos"):
 # type of sizing = what type of size to use, if MB or MiB, etc.
 # part_start, part_end = where partition starts and ends, respectively. 1 and -1 is whole "disk"
 def create_new_partition(disk, type_of_part, type_of_sizing, part_start, part_end):
-    out = subprocess.call(["parted", "--script", "/dev/{}".format(disk), "unit", "{}".format(type_of_sizing), "mkpart {} {} {}".format(type_of_part, part_start, part_end)])
+    out = subprocess.call(["parted --script /dev/{} unit \'mkpart {} {} {}\'".format(disk, type_of_sizing, type_of_part, part_start, part_end)], shell=True)
     if out != 0:
         sys.exit(out)
     else:
