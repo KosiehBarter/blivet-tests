@@ -64,3 +64,46 @@ class BlivetPartition_Scan(BlivetDiskFormatted_Scan):
         self.bd_part_size = self.bd_part_obj.size
         self.bd_part_start = self.bd_part_obj.partedPartition.geometry.start
         self.bd_part_end = self.bd_part_obj.partedPartition.geometry.end
+
+
+class BlivetPartitionFormatted_Scan(BlivetPartition_Scan):
+    """ docstring"""
+    def __init__(self, disk, part_num):
+        """
+            :param
+        """
+        super(BlivetPartitionFormatted_Scan, self).__init__(disk, part_num)
+        self.bd_part_for_format = None
+        self.bd_part_for_uuid = None
+
+
+class BlivetExtended_Scan(BlivetDiskFormatted_Scan):
+    """ docstring"""
+    def __init__(self, disk):
+        """
+            :param
+        """
+        super(BlivetExtended_Scan, self).__init__(disk)
+        self.bd_ex_uuid = None
+        self.bd_ex_name = None
+        self.bd_ex_type = None
+        self.bd_ex_size = None
+        self.bd_ex_strt = None
+        self.bd_ex_end = None
+        self.bd_ex_logv = None
+
+
+class BlivetLogical_Scan(BlivetExtended_Scan):
+    """ docstring"""
+    def __init__(self, disk, lvol_num):
+        """
+            :param
+        """
+        super(BlivetLogical_Scan, self).__init__(disk)
+        self.bd_lv_name = None
+        self.bd_lv_uuid = None
+        self.bd_lv_type = None
+        self.bd_lv_size = None
+        self.bd_lv_strt = None
+        self.bd_lv_end = None
+        self.bd_lv_logv = None
