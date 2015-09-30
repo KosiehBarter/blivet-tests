@@ -7,22 +7,10 @@ import sys
 import subprocess
 from random import randint
 
-## GET section
-"""def get_sector_size(disk):
-    return int(subprocess.getoutput("cat /sys/block/{}/queue/hw_sector_size".format(disk)))
-
-def get_num_of_sectors(disk):
-    return int(subprocess.getoutput("cat /sys/block/{}/size".format(disk)))
-
-def get_real_disk_size(disk):
-    return ((get_sect_size(disk) * get_disk_size(disk)) / (1024 * 1024))
-
-def get_removable(disk):
-    return int(subprocess.getoutput("cat /sys/block/{}"""
-
 ## Get information with cat
 def cat_data(fp): # fp = full path
     return subprocess.getoutput("cat {}".format(fp))
+
 
 ## Boolean method of cat_data
 def cat_data_boolean(fp, pp = None):
@@ -36,13 +24,15 @@ def cat_data_boolean(fp, pp = None):
 def get_part_mount_point(part_name):
     return subprocess.getoutput("LANG=c tune2fs /dev/{} -l | grep Last\ mounted\ on | sed 's/Last\ mounted\ on:\s*//'".format(part_name))
 
+
 ## Get partition's format
 def get_part_format(part_name):
-    # return result = subprocess.getoutput("cat /proc/mounts | grep /dev/{}".format(part_name))
     return subprocess.getoutput("blkid /dev/{}".format(part_name)).split("\"")[3]
+
 
 def get_disk_uuid(disk, typ = 1):
     return subprocess.getoutput("blkid /dev/{}".format(disk)).split("\"")[typ]
+
 
 ## Get path with ls
 def ls_path(fp, grep = None):
@@ -50,6 +40,7 @@ def ls_path(fp, grep = None):
         return subprocess.getoutput("ls -l {} | grep {}".format(fp, grep))
     else:
         return subprocess.getoutput("ls {}".format(fp))
+
 
 ## Get alloc type
 def get_alloc_type(disk):
@@ -64,6 +55,7 @@ def get_part_size(disk, part_number, lvm = False):
     else:
         return int(subprocess.getoutput("cat /sys/block/{}{}/size".format(disk, part_number)))
 
+
 ## Create a new MBR (for new disks)
 # table_type = msdos or gpt
 def create_new_alloc_table(disk, table_type = "msdos"):
@@ -72,6 +64,7 @@ def create_new_alloc_table(disk, table_type = "msdos"):
         sys.exit(out)
     else:
         return
+
 
 ## Create a new partition
 # disk = disk to be scanned
@@ -84,6 +77,7 @@ def create_new_partition(disk, type_of_part, type_of_sizing, part_start, part_en
         sys.exit(out)
     else:
         return
+
 
 ## Format the partition
 # partition = self explanatory
