@@ -40,14 +40,18 @@ if vys == "":
     "--graphics", "vnc,listen=0.0.0.0", "--noautoconsole",\
     "--ram", "{}".format(ram_size), "-x", "ks={}".format(ks_file_path), "--noreboot"])
 
-while (subprocess.call(["virsh list | grep {}".format(mach_name)], shell=True) != 1):
-    time.sleep(10)
+    ### Wait until the machine is powered off. Try to ssh if installed.
+    while (subprocess.call(["virsh list | grep {}".format(mach_name)], shell=True) != 1):
+        time.sleep(10)
 
-subprocess.call(["virsh snapshot-create-as {} snap-start --atomic".format(mach_name)], shell=True)
+    ## Create snapshot, start the machine and find its IP address
+    subprocess.call(["virsh snapshot-create-as {} snap-start --atomic".format(mach_name)], shell=True)
+
 subprocess.call(["virsh", "start", install_name])
 while (subprocess.call(["virt-log -d {} | grep bound".format(mach_name)], shell=True) != 0):
     time.sleep(10)
 
+## Regex the IP address from log and store it to variable. Then make a list of files to be scp-ed.
 ip_address = subprocess.getoutput("virt-log -d {} | grep bound | tail -n 1".format(mach_name))
 vystup = re.search(r'.*to\ ([0-9]*.[0-9]*.[0-9*]*.[0-9]*).*', ip_address)
 if vystup:
@@ -61,10 +65,11 @@ for inc in file_list:
     subprocess.call(["scp", "-o", "UserKnownHostsFile=/dev/null", "-o", "StrictHostKeyChecking=no", "-i", "{}".format(key_location), inc, "{}:~".format(vystup.group(1))])
 
 # run test
+subprocess.call(["ssh -i {} -o StrictHostKeyChecking=no root@{} 'rm -rf /root/TEST_RESULT'".format(key_location, vystup.group(1))], shell=True)
 subprocess.call(["ssh", "-i", "{}".format(key_location), "-o", "StrictHostKeyChecking=no", "root@{}".format(vystup.group(1)), "'python3'","'test_arrays.py'"])
-subprocess.call(["scp", "-i", "{}".format(key_location), "root@{}:/root/TEST_RESULT".format(vystup.group(1)), "./"])
+subprocess.call(["scp -i {} root@{}:/root/TEST_RESULT ./".format(key_location, vystup.group(1))], shell=True)
 vys = subprocess.call(["virsh snapshot-revert  {} snap-start".format(mach_name)], shell=True)
 if vys != 0:
     print("*** ERROR: Snapshot failed to revert")
-subprocess.call(["cat", "./TEST_RESULT"])
+subprocess.call(["cat ./TEST_RESULT"], shell=True)
 subprocess.call(["virsh shutdown {}".format(mach_name)], shell=True)
