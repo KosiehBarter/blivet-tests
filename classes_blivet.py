@@ -73,8 +73,8 @@ class BlivetPartitionFormatted_Scan(BlivetPartition_Scan):
             :param
         """
         super(BlivetPartitionFormatted_Scan, self).__init__(disk, part_num)
-        self.bd_part_for_format = None
-        self.bd_part_for_uuid = None
+        self.bd_part_for_format = self.bd_part_obj[part_num].format.type
+        self.bd_part_for_uuid = self.bd_part_obj[part_num].format.uuid
 
 
 class BlivetExtended_Scan(BlivetDiskFormatted_Scan):
