@@ -11,7 +11,6 @@
 """
 
 import test_utils
-import blivet_test_utils
 
 class SystemDisk_Exe(object):
     """ Contains all data regarding to a disk.
@@ -44,7 +43,7 @@ class SystemDiskFormatted_Exe(SystemDisk_Exe):
         test_utils.create_new_alloc_table(self.name, 'msdos')
         test_utils.create_new_alloc_table(self.name)
         self.alloc_type = test_utils.get_alloc_type(self.name)
-        self.disk_uuid = test_utils.get_disk_uuid(self.name)
+        self.disk_uuid = test_utils.get_disk_props(self.name, 1)
 
 
 class SystemPartition_Exe(SystemDiskFormatted_Exe):
@@ -62,7 +61,7 @@ class SystemPartition_Exe(SystemDiskFormatted_Exe):
         super(SystemPartition_Exe, self).__init__(disk)
 
         self.sd_part_name = "{}{}".format(self.name, part_num)
-        self.sd_part_uuid = test_utils.get_disk_uuid(self.name, 1)
+        self.sd_part_uuid = test_utils.get_disk_props(self.name, 1)
         self.sd_part_size = int(test_utils.cat_data("/sys/block/{}/{}{}/size".format(self.name, self.sd_part_name))) * self.num_of_sectors
         self.sd_part_start = int(test_utils.cat_data("/sys/block/{}/{}{}/start".format(self.name, self.sd_part_name)))
         self.sd_part_end = self.sd_part_size + 2048
@@ -75,8 +74,8 @@ class SystemPartitionFormatted_Exe(SystemPartition):
             :param str
         """
         super(SystemPartitionFormatted_Exe, self).__init__(disk, part_num)
-        self.sd_part_for_format = None
-        self.sd_part_for_uuid = None
+        self.sd_part_for_format = test_utils.get_disk_props(sd_part_name, 3)
+        self.sd_part_for_uuid = test_utils.get_disk_props(sd_part_name, 1)
 
 
 class SystemExtended_Exe(SystemDiskFormatted_Exe):
@@ -94,7 +93,7 @@ class SystemExtended_Exe(SystemDiskFormatted_Exe):
         self.sd_ex_end = None
         self.sd_ex_logv = None
 
-
+-+
 class SystemLogical_Exe(SystemExtended_Exe):
     """ docstring"""
     def __init__(self, disk, logv_num):
