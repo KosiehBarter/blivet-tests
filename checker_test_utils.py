@@ -7,6 +7,9 @@
 def test_properties_disk(sys_scan, blv_scan):
     lt = ["NAME", "PATH", "REMOVABLE", "VENDOR", "SIZE"]
     ia = []
+    ## ss = sys_scan.test_attributes()
+    ## for attr in ss:
+        ## sys_scan.getattr(attr) == blv_scan.getattr(attr) 
     ss = [sys_scan.name, sys_scan.system_path, sys_scan.removable, sys_scan.vendor, sys_scan.space]
     bs = [blv_scan.b_name, blv_scan.b_system_path, blv_scan.b_removable, blv_scan.b_vendor, blv_scan.b_space]
     for inc in range(len(ss)):
