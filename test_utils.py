@@ -24,15 +24,9 @@ def cat_data_boolean(fp, pp = None):
 def get_part_mount_point(part_name):
     return subprocess.getoutput("LANG=c tune2fs /dev/{} -l | grep Last\ mounted\ on | sed 's/Last\ mounted\ on:\s*//'".format(part_name))
 
-
-## Get partition's format
-def get_part_format(part_name):
-    return subprocess.getoutput("blkid /dev/{}".format(part_name)).split("\"")[3]
-
-
-def get_disk_uuid(disk, typ = 1):
-    return subprocess.getoutput("blkid /dev/{}".format(disk)).split("\"")[typ]
-
+## Get disk's properties with blkid
+def get_disk_props(disk, prop_ind):
+    return subprocess.getoutput("blkid /dev/{}".format(disk)).split("\"")[prop_ind]
 
 ## Get path with ls
 def ls_path(fp, grep = None):
