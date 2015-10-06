@@ -7,6 +7,45 @@ import sys
 import subprocess
 from random import randint
 
+
+## Write issues to file
+def write_issues(ia, action):
+    f = open("/root/TEST_RESULT", "a+")
+    if ia == []:
+        f.write("{} CHECK OK\n".format(action))
+    else:
+        for inc in ia:
+            f.write("{}\n".format(inc))
+    f.close()
+
+
+#### Main test
+def test(sys_scan, blv_scan):
+    ia = []
+
+    for inc in sys_scan.get_attributes():
+        if (type(sys_scan) == str):
+            # print("{}\t{}".format((getattr(sys_scan, inc)), getattr(blv_scan, inc))) ## Debug: print
+            if (getattr(sys_scan, inc) != getattr(blv_scan, inc)):
+                ia.append("FAIL:\t{} != {}".format(getattr(sys_scan, inc), getattr(blv_scan, inc)))
+
+        elif(type(sys_scan) == tuple):
+            # print("{}\t{}".format((getattr(sys_scan, inc[0]), (getattr(blv_scan, inc[1]))))) ## Debug: print
+            if (getattr(sys_scan, inc[0]) != getattr(blv_scan, inc[1])):
+                ia.append("FAIL:\t{} != {}".format(getattr(sys_scan[0], inc), getattr(blv_scan, inc[1])))
+
+    """for inc in sys_scan.get_attributes():
+        if (type(sys_scan) == str):
+            print("{}\t{}".format(getattr(sys_scan, inc), getattr(blv_scan, inc)))
+            if (getattr(sys_scan, inc != getattr(blv_scan, inc))):
+
+
+        elif (type(sys_scan) == tuple):
+            if (getattr(sys_scan, inc[0]) != getattr(blv_scan, inc[1])):
+"""
+    return ia
+
+
 ## Get information with cat
 def cat_data(fp): # fp = full path
     return subprocess.getoutput("cat {}".format(fp))
@@ -20,13 +59,21 @@ def cat_data_boolean(fp, pp = None):
         else:
             return True
 
+
+## Get head of data
+def get_data_head(data):
+    return subprocess.getoutput("find /sys/devices/ | grep {} | head -1".format(data))
+
+
 ## Get partition's mount point
 def get_part_mount_point(part_name):
     return subprocess.getoutput("LANG=c tune2fs /dev/{} -l | grep Last\ mounted\ on | sed 's/Last\ mounted\ on:\s*//'".format(part_name))
 
+
 ## Get disk's properties with blkid
 def get_disk_props(disk, prop_ind):
     return subprocess.getoutput("blkid /dev/{}".format(disk)).split("\"")[prop_ind]
+
 
 ## Get path with ls
 def ls_path(fp, grep = None):
@@ -65,8 +112,8 @@ def create_new_alloc_table(disk, table_type = "msdos"):
 # type_of_part = type of partition - primary, extended, logical
 # type of sizing = what type of size to use, if MB or MiB, etc.
 # part_start, part_end = where partition starts and ends, respectively. 1 and -1 is whole "disk"
-def create_new_partition(disk, type_of_part, type_of_sizing, part_start, part_end):
-    out = subprocess.call(["parted --script /dev/{} unit \'mkpart {} {} {}\'".format(disk, type_of_sizing, type_of_part, part_start, part_end)], shell=True)
+def create_new_partition(disk, type_of_part, part_start, part_end):
+    out = subprocess.call(["parted --script /dev/{} 'mkpart {} {} {}'".format(disk, type_of_part, part_start, part_end)], shell=True)
     if out != 0:
         sys.exit(out)
     else:
