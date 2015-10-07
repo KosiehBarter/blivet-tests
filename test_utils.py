@@ -33,16 +33,6 @@ def test(sys_scan, blv_scan):
             # print("{}\t{}".format((getattr(sys_scan, inc[0]), (getattr(blv_scan, inc[1]))))) ## Debug: print
             if (getattr(sys_scan, inc[0]) != getattr(blv_scan, inc[1])):
                 ia.append("FAIL:\t{} != {}".format(getattr(sys_scan[0], inc), getattr(blv_scan, inc[1])))
-
-    """for inc in sys_scan.get_attributes():
-        if (type(sys_scan) == str):
-            print("{}\t{}".format(getattr(sys_scan, inc), getattr(blv_scan, inc)))
-            if (getattr(sys_scan, inc != getattr(blv_scan, inc))):
-
-
-        elif (type(sys_scan) == tuple):
-            if (getattr(sys_scan, inc[0]) != getattr(blv_scan, inc[1])):
-"""
     return ia
 
 
@@ -112,8 +102,8 @@ def create_new_alloc_table(disk, table_type = "msdos"):
 # type_of_part = type of partition - primary, extended, logical
 # type of sizing = what type of size to use, if MB or MiB, etc.
 # part_start, part_end = where partition starts and ends, respectively. 1 and -1 is whole "disk"
-def create_new_partition(disk, type_of_part, part_start, part_end):
-    out = subprocess.call(["parted --script /dev/{} 'mkpart {} {} {}'".format(disk, type_of_part, part_start, part_end)], shell=True)
+def create_new_partition(disk, type_of_part, part_start, part_end, type_of_size = "MiB"):
+    out = subprocess.call(["parted --script /dev/{} unit {} 'mkpart {} {} {}'".format(disk, type_of_size, type_of_part, part_start, part_end)], shell=True)
     if out != 0:
         sys.exit(out)
     else:
@@ -123,8 +113,8 @@ def create_new_partition(disk, type_of_part, part_start, part_end):
 ## Format the partition
 # partition = self explanatory
 # format = ext4, ext3 and so on
-def format_new_partition(partition, filesystem = "ext4"):
-    out = subprocess.call(["mkfs.{}".format(filesystem), "/dev/{}".format(partition)])
+def format_new_partition(partition, filesystem):
+    out = subprocess.call(["LANG=c mkfs.{} /dev/{} -F".format(filesystem, partition)], shell=True)
     if out != 0:
         sys.exit(out)
     else:
