@@ -2,9 +2,7 @@
 ### Part of: Blivet test collection
 ### Author: kvalek@redhat.com
 ### This program is under GPL licence.
-
 import classes
-import checker_test_utils
 import test_utils
 
 test_utils.create_new_alloc_table("vdb")
