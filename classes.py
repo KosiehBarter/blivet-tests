@@ -88,13 +88,16 @@ class SystemPartition_Scan(SystemDiskFormatted_Scan):
 
 class SystemPartitionFormatted_Scan(SystemPartition_Scan):
     """ Docstring here"""
-    def __init__(self, d_name, part_num, format):
+    def __init__(self, d_name, part_num):
         """
             :param str
         """
         super(SystemPartitionFormatted_Scan, self).__init__(d_name, part_num)
-        self.sd_part_for_format = test_utils.get_disk_props(sd_part_name, 3)
-        self.sd_part_for_uuid = test_utils.get_disk_props(sd_part_name, 1)
+        self.sd_part_for_format = test_utils.get_disk_props(self.p_name, 3)
+        self.sd_part_for_uuid = test_utils.get_disk_props(self.p_name, 1)
+
+    def get_attributes(self):
+        return [("sd_part_for_format", "format.type"), ("sd_part_for_uuid", "format.uuid")]
 
 
 class SystemExtended_Scan(SystemDiskFormatted_Scan):
@@ -109,7 +112,7 @@ class SystemExtended_Scan(SystemDiskFormatted_Scan):
         self.sd_ex_type = None
         self.sd_ex_size = None
         self.sd_ex_strt = None
-        self.sd_ex_end = None
+        self.sd_ex_pend = None
         self.sd_ex_logv = None
 
 
@@ -125,5 +128,5 @@ class SystemLogical_Scan(SystemExtended_Scan):
         self.sd_lv_type = None
         self.sd_lv_size = None
         self.sd_lv_strt = None
-        self.sd_lv_end = None
+        self.sd_lv_pend = None
         self.sd_lv_logv = None
