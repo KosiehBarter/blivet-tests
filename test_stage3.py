@@ -3,9 +3,7 @@
 ### Author: kvalek@redhat.com
 ### This program is under GPL licence.
 import classes
-import checker_test_utils
 import test_utils
-
 
 test_utils.create_new_alloc_table("vdb")
 test_utils.create_new_partition("vdb", "primary", 1, -1)
