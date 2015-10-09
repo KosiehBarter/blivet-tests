@@ -9,13 +9,14 @@ from random import randint
 
 
 ## Write issues to file
-def write_issues(ia, action):
-    f = open("/root/TEST_RESULT", "a+")
-    if ia == []:
-        f.write("{} CHECK OK\n".format(action))
-    else:
+def write_issues(ia, action, stage):
+    f = open("/root/TEST_RESULT_{}".format(stage), "w")
+
+    if ia != []:
         for inc in ia:
             f.write("{}\n".format(inc))
+    else:
+        f.write("{} CHECK OK\n".format(action))
     f.close()
 
 
@@ -24,16 +25,33 @@ def test(sys_scan, blv_scan):
     ia = []
 
     for inc in sys_scan.get_attributes():
-        if (type(sys_scan) == str):
-            # print("{}\t{}".format((getattr(sys_scan, inc)), getattr(blv_scan, inc))) ## Debug: print
-            if (getattr(sys_scan, inc) != getattr(blv_scan, inc)):
+        if  (type(inc) == str):
+            if(getattr(sys_scan, inc) != getattr(blv_scan, inc)):
                 ia.append("FAIL:\t{} != {}".format(getattr(sys_scan, inc), getattr(blv_scan, inc)))
 
-        elif(type(sys_scan) == tuple):
-            # print("{}\t{}".format((getattr(sys_scan, inc[0]), (getattr(blv_scan, inc[1]))))) ## Debug: print
-            if (getattr(sys_scan, inc[0]) != getattr(blv_scan, inc[1])):
-                ia.append("FAIL:\t{} != {}".format(getattr(sys_scan[0], inc), getattr(blv_scan, inc[1])))
+        elif(type(inc) == tuple):
+            if(getattr(sys_scan, inc[0]) != getdeepattr(blv_scan, inc[1])):
+                ia.append("FAIL: {}:\t\t{} != {}".format(inc[0], getattr(sys_scan, inc[0]), getdeepattr(blv_scan, inc[1])))
     return ia
+
+
+## Copied from /pyanaconda/iutil.py
+def getdeepattr(obj, name):
+    """This behaves as the standard getattr, but supports
+       composite (containing dots) attribute names.
+
+       As an example:
+
+       >>> import os
+       >>> from os.path import split
+       >>> getdeepattr(os, "path.split") == split
+       True
+    """
+
+    for attr in name.split("."):
+        obj = getattr(obj, attr)
+    return obj
+
 
 
 ## Get information with cat
@@ -90,7 +108,7 @@ def get_part_size(disk, part_number, lvm = False):
 ## Create a new MBR (for new disks)
 # table_type = msdos or gpt
 def create_new_alloc_table(disk, table_type = "msdos"):
-    out = subprocess.call(["parted", "--script", "/dev/{}".format(disk), "mklabel", "{}".format(table_type)])
+    out = subprocess.call(["parted --script /dev/{} mklabel {}".format(disk, table_type)], shell=True)
     if out != 0:
         sys.exit(out)
     else:
