@@ -1,4 +1,4 @@
-### Test utils - Blivet
+### Test utils - Virtual machines
 ### Part of: Blivet test collection
 ### Author: kvalek@redhat.com
 ### This program is under GPL licence.
@@ -68,19 +68,32 @@ def find_ip_address(install_name):
 
 
 ## Copy files to machine
-def copy_files(ip_address, copy_path, ssh_cred):
+def copy_files(ip_address, copy_path, ssh_cred, return_bool = False):
     file_list = glob.glob("{}*".format(copy_path))
     for inc in file_list:
         subprocess.call(["scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i {} {} root@{}:/root/".format(ssh_cred, inc, ip_address)], shell=True)
+    if return_bool == True:
+        return file_list
 
 
 ## Run specified test on a machine with specified IP
-def run_test(ip_address, test_stage, install_name, ssh_cred):
-    subprocess.call(["ssh -i {}{} -o StrictHostKeyChecking=no root@{} 'rm -rf /root/TEST_RESULT'".format(disk_path, ssh_cred, ip_address)], shell=True)
-    subprocess.call(["ssh -i {}{} -o StrictHostKeyChecking=no root@{} 'python3 {}.py'".format(disk_path, ssh_cred, ip_address, test_stage)])
-    subprocess.call(["mkdir {}/Output"], shell=True)
-    subprocess.call(["scp -i {}{} root@{}:/root/TEST_RESULT {}/Output/".format(disk_path, ssh_cred, ip_address, disk_path)], shell=True)
-    subprocess.call(["virsh shutdown {}".format(install_name)], shell=True)
-    vys = subprocess.call(["virsh snapshot-revert  {} snap-start".format(mach_name)], shell=True)
-    if vys != 0:
-        return "*** ERROR: Snapshot failed to revert"
+def run_test(ip_address, stage_list, scp_copy_source, ssh_full_path, install_name, machine_snap_name):
+    if subprocess.call(["ls {}Test_Output".format(scp_copy_source)], shell=True) != 0:
+        subprocess.call(["mkdir {}Test_Output".format(scp_copy_source)], shell=True)
+
+    counter = 1
+    for inc in stage_list:
+        start_machine(install_name)
+        copy_files(ip_address, scp_copy_source, ssh_full_path)
+
+        if subprocess.call(["ssh -o StrictHostKeyChecking=no -i {} root@{} 'ls ~/test_stage{}.py'".format(ssh_full_path, ip_address, counter)], shell=True) == 0:
+            subprocess.call(["ssh -o StrictHostKeyChecking=no -i {} root@{} 'python3 test_stage{}.py'".format(ssh_full_path, ip_address, counter)], shell=True)
+            subprocess.call(["scp -o StrictHostKeyChecking=no -i {} root@{}:~/TEST_RESULT_{} {}Test_Output/".format(ssh_full_path, ip_address, counter, scp_copy_source)], shell=True)
+            subprocess.call(["virsh shutdown {}".format(install_name)], shell=True)
+            counter = counter + 1
+            out = subprocess.call(["virsh snapshot-revert {} {}".format(install_name, machine_snap_name)], shell=True)
+            if out != 0:
+                return "FAIL:\tVIRSH FAILED TO REVERT TO \"{}\"".format(machine_snap_name)
+        else:
+            break
+    return
