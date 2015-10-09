@@ -8,4 +8,4 @@ import test_utils
 test_system = classes.SystemDisk_Scan('vdb')
 test_blivet = classes.BlivetInitialization('vdb').disk
 ia = test_utils.test(test_system, test_blivet)
-test_utils.write_issues(ia, "Basic disk")
+test_utils.write_issues(ia, "Basic disk", 1)

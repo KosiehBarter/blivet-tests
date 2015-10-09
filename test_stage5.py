@@ -36,4 +36,4 @@ for inc in range(4):
     list_of_ia.append(test_utils.test(list_of_tests[inc], list_of_blivet[inc]))
 
     ## Store in file.
-    test_utils.write_issues(list_of_ia[inc], "Multi partition - part {}".format(inc + 1))
+    test_utils.write_issues(list_of_ia[inc], "Multi partition - part {}".format(inc + 1), 5)

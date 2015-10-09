@@ -12,4 +12,4 @@ test_utils.format_new_partition("{}{}".format("vdb", 1), "ext4")
 tspf = classes.SystemPartitionFormatted_Scan('vdb', 1)
 tbpf = classes.BlivetInitialization('vdb', 1).child
 ia = test_utils.test(tspf, tbpf)
-test_utils.write_issues(ia, "Single partition formatted")
+test_utils.write_issues(ia, "Single partition formatted", 4)
