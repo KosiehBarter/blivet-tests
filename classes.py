@@ -17,7 +17,7 @@ import blivet
 class BlivetInitialization(object):
     """ This basic class initializes Blivet and returns
         Blivet object, performs Blivet().reset()"""
-    def __init__(self, disk, child_index = 1):
+    def __init__(self, disk, child_index = None):
         """
             :param str disk: disk's name
             :param bool child: If TRUE, get disk's partition / child object
@@ -27,7 +27,8 @@ class BlivetInitialization(object):
         self.object = blivet.Blivet()
         self.object.reset()
         self.disk = self.object.devicetree.getDeviceByName(disk)
-        self.child = self.object.devicetree.getChildren(self.disk)[child_index - 1]
+        if child_index != None:
+            self.child = self.object.devicetree.getChildren(self.disk)[child_index - 1]
 
 
 class SystemDisk_Scan(object):
@@ -47,7 +48,10 @@ class SystemDisk_Scan(object):
         self.sector_size = int(test_utils.cat_data("/sys/block/{}/queue/hw_sector_size".format(self.name)))
 
     def get_attributes(self):
-        return ["name", "path", "removable", "vendor", "sysfsPath", "size", ("sector_size", "int(format.sectorSize)")]
+        return ["name", "path", "removable", "vendor", "sysfsPath", "size", ("sector_size", "format.sectorSize")]
+
+    def rec_getattr(self, obj_inst, attr_name):
+        return reduce(getattr, attr_name.split("."), obj_inst)
 
 
 class SystemDiskFormatted_Scan(SystemDisk_Scan):
@@ -90,7 +94,8 @@ class SystemPartitionFormatted_Scan(SystemPartition_Scan):
     """ Docstring here"""
     def __init__(self, d_name, part_num):
         """
-            :param str
+            :param str d_name: disk's name
+            :param int part_num: partition number
         """
         super(SystemPartitionFormatted_Scan, self).__init__(d_name, part_num)
         self.sd_part_for_format = test_utils.get_disk_props(self.p_name, 3)
@@ -100,20 +105,23 @@ class SystemPartitionFormatted_Scan(SystemPartition_Scan):
         return [("sd_part_for_format", "format.type"), ("sd_part_for_uuid", "format.uuid")]
 
 
-class SystemExtended_Scan(SystemDiskFormatted_Scan):
+class SystemExtended_Scan(SystemPartition_Scan):
     """ docstring for SystemExtended_Scan"""
-    def __init__(self, d_name):
+    def __init__(self, d_name, part_num):
         """
-            :param
+            :param str d_name: disk's name
+            :param int part_num: partition number
         """
-        super(SystemExtended_Scan, self).__init__(disk)
-        self.sd_ex_name = None
-        self.sd_ex_uuid = None
-        self.sd_ex_type = None
-        self.sd_ex_size = None
-        self.sd_ex_strt = None
-        self.sd_ex_pend = None
-        self.sd_ex_logv = None
+        super(SystemExtended_Scan, self).__init__(d_name, part_num)
+        self.sd_ex_name = self.p_name
+        self.sd_ex_uuid = test_utils.get_disk_props(self.sd_ex_name, 3)
+        self.sd_ex_bool = None
+        self.sd_ex_size = int(test_utils.cat_data("/sys/block/{}/{}/size".format(self.name, self.sd_ex_name))) * self.p_num_of_sectors
+        self.sd_ex_strt = int(test_utils.cat_data("/sys/block/{}/{}/start".format(self.name, self.sd_ex_name)))
+        self.sd_ex_pend = self.sd_ex_strt + self.p_num_of_sectors
+
+    def get_attributes(self):
+        return [("sd_ex_name", "name"), ("sd_ex_uuid", "uuid"), ("sd_ex_bool", "isExtended"), ("sd_ex_size", "size"), ("sd_ex_strt", "partedPartition.geometry.start"), ("sd_ex_pend", "partedPartition.geometry.end")]
 
 
 class SystemLogical_Scan(SystemExtended_Scan):
@@ -124,9 +132,9 @@ class SystemLogical_Scan(SystemExtended_Scan):
         """
         super(SystemLogical_Scan, self).__init__(disk)
         self.sd_lv_name = None
-        self.sd_lv_uuid = None
+        self.sd_lv_uuid = test_utils.get_disk_props(self.sd_lv_name, 3)
         self.sd_lv_type = None
-        self.sd_lv_size = None
-        self.sd_lv_strt = None
-        self.sd_lv_pend = None
-        self.sd_lv_logv = None
+        self.sd_lv_nsec = None
+        self.sd_lv_size = int(test_utils.cat_data("/sys/block/{}/{}/size".format(self.name, self.sd_lv_name)))
+        self.sd_lv_strt = int(test_utils.cat_data("/sys/block/{}/{}/start".format(self.name, self.sd_lv_name)))
+        self.sd_lv_pend = self.sd_lv_strt + self.sd_lv_nsec
