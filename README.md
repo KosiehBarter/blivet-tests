@@ -10,27 +10,24 @@ Firstly, modify Execute_test to suit your needs and your system, mainly paths an
 Then run the script with python3 as root or with sudo to start automatic machine creation. The machine will be created and automatic kickstart installation will start. The virtual machine is reachable with vncviewer or any vnc client with localhost:0.
 
 After install, there is a automatic dynamic timer, which will wait for installation completion and will initiate tests written in test_arrays.py, which includes classes.py as a object for comparation.
-# At this time, the test_arrays will not run due to code rework.
 
 There are several tools, test_utils.py and test_utils_blivet.py. Both files include basic gather tools for system and blivet respectively.
 
-Note that in virtual_machine.py, at the begining, there are some constants, which can be altered for your needs.
+Note that in Execute_test, at the begining, there are some constants, which can be altered for your needs.
 A small documentation:
-* install_name - name of machine and installation.
-* install_disk - a iso, which is used for installation. You can specify your own.
-* full_disk_path_1 - same as install_disk, but for disk. You can specify your own, but you have to manually create dirs if needed.
-* full_loc_path - same as before.
+* machine_name - name of machine and installation.
+* machine_full_path - path, where are stored virtual disks.
+* machine_ks_full_path - kickstart file location, can be URL or local file. NOTE: must be full path
+* machine_iso_full_path - same as machine_full_path, but iso. Include the file with extension!
+* machine_snap_name - custom name for main snapshot.
 
-* ks_file_path - kickstart file, can be URL or local. URL is preffered.
-* key_location - your own ssh key. You have to create your own.
-* ram_size - amount of machine memory, in MB.
-* scp_source - source for tests, have to be set manually.
+* ssh_full_path - full path to private key to allow automatic test
+* scp_copy_source - path to directory, where are stored all test files (including tools)
 
 # Depedencies / Requirements:
 * python3
 * virsh
-* virt-install (part of virsh?)
+* virt-install (part of virsh)
 * ssh + scp + ssh-keygen
-
 
 # Note: This guide is in development, so tools will be added and there is possibility, that some tools in repository will be changed.
