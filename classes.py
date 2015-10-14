@@ -48,7 +48,7 @@ class SystemDisk_Scan(object):
         self.sector_size = int(test_utils.cat_data("/sys/block/{}/queue/hw_sector_size".format(self.name)))
 
     def get_attributes(self):
-        return ["name", "path", "removable", "vendor", "sysfsPath", "size", ("sector_size", "format.sectorSize")]
+        return ["name", "path", "removable", "vendor", "sysfsPath", "size"]
 
     def rec_getattr(self, obj_inst, attr_name):
         return reduce(getattr, attr_name.split("."), obj_inst)
@@ -113,7 +113,7 @@ class SystemExtended_Scan(SystemPartition_Scan):
             :param int part_num: partition number
         """
         super(SystemExtended_Scan, self).__init__(d_name, part_num)
-        self.sd_ex_name = self.p_name
+        self.sd_ex_name = "{}{}".format(d_name, part_num)
         self.sd_ex_uuid = test_utils.get_disk_props(self.sd_ex_name, 3)
         self.sd_ex_bool = None
         self.sd_ex_size = int(test_utils.cat_data("/sys/block/{}/{}/size".format(self.name, self.sd_ex_name))) * self.p_num_of_sectors
@@ -126,15 +126,19 @@ class SystemExtended_Scan(SystemPartition_Scan):
 
 class SystemLogical_Scan(SystemExtended_Scan):
     """ docstring"""
-    def __init__(self, d_name, logv_num):
+    def __init__(self, d_name, part_num):
         """
             :param
         """
-        super(SystemLogical_Scan, self).__init__(disk)
-        self.sd_lv_name = None
-        self.sd_lv_uuid = test_utils.get_disk_props(self.sd_lv_name, 3)
+        super(SystemLogical_Scan, self).__init__(d_name, part_num)
+        self.sd_lv_name = "{}{}".format(d_name, test_utils.assign_logical_number(d_name, part_num))
+        self.sd_lv_logn = test_utils.assign_logical_number(d_name, part_num)
+        self.sd_lv_uuid = None #test_utils.get_disk_props(self.sd_lv_name, 1)
         self.sd_lv_type = None
         self.sd_lv_nsec = None
         self.sd_lv_size = int(test_utils.cat_data("/sys/block/{}/{}/size".format(self.name, self.sd_lv_name)))
         self.sd_lv_strt = int(test_utils.cat_data("/sys/block/{}/{}/start".format(self.name, self.sd_lv_name)))
-        self.sd_lv_pend = self.sd_lv_strt + self.sd_lv_nsec
+        self.sd_lv_pend = None #self.sd_lv_strt + self.sd_lv_nsec
+
+    def get_attributes(self):
+        return [("sd_lv_name", "name"), ("sd_lv_uuid", "uuid"), ("sd_lv_size", "size"), ("sd_lv_strt", "partedPartition.geometry.start"), ("sd_lv_pend", "partedPartition.geometry.end")]
