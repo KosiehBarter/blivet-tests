@@ -9,7 +9,8 @@ import time
 import re
 
 ## Create a machine function.
-def create_machine(install_name, ram_size, disk_path, kickstart, iso_file, additional_disks = 1):
+#def create_machine(install_name, ram_size, disk_path, kickstart, iso_file, machine_snap_name, additional_disks = 1):
+def create_machine(install_name, ram_size, disk_path, kickstart, iso_file, machine_snap_name, additional_disks = 1):
     if(install_name == "" or ram_size == 0, disk_path == "" or iso_file == ""):
         print("Please specify all parameters:\n\
 \tinstall_name - name of the machine to perform a test on\n\
@@ -19,6 +20,7 @@ def create_machine(install_name, ram_size, disk_path, kickstart, iso_file, addit
 \t\tNOTE: Specify full path, eg. /home/Libvirt_disks/, including ending slash.\n\
 \tkickstart - kickstart path or URL.\n\
 \tiso_file - used with disk_path, specifies iso for install. Specify full name.")
+    print(kickstart)
 
     # undefine domain if needed
     subprocess.call(["virsh destroy {}".format(install_name)], shell=True)
@@ -36,10 +38,10 @@ def create_machine(install_name, ram_size, disk_path, kickstart, iso_file, addit
     subprocess.call(["virt-install --name {}\
     --disk \"{}{}_vda,size=8\" \
     {}\
-    --location {}{} \
+    --location {} \
     --graphics vnc,listen=0.0.0.0 --noautoconsole \
     --ram {} -x ks={} --noreboot\
-    ".format(install_name, disk_path, install_name, disk_arg, disk_path, iso_file, ram_size, kickstart)], shell=True)
+    ".format(install_name, disk_path, install_name, disk_arg, iso_file, ram_size, kickstart)], shell=True)
 
     ### Wait until the machine is powered off. Try to ssh if installed.
     while (subprocess.call(["virsh list | grep {} > /dev/null".format(install_name)], shell=True) != 1):
@@ -48,8 +50,8 @@ def create_machine(install_name, ram_size, disk_path, kickstart, iso_file, addit
     start_machine(install_name)
 
     ## Create a snapshot of the machine.
-    subprocess.call(["virsh snapshot-create-as {} snap-start".format(install_name)], shell=True)
-    subprocess.call(["virsh shutdown {}".format(install_name)], shell=True)
+    subprocess.call(["virsh snapshot-create-as {} {}".format(install_name, machine_snap_name)], shell=True)
+    # subprocess.call(["virsh shutdown {}".format(install_name)], shell=True)
 
 
 ## Start the machine.
@@ -69,9 +71,10 @@ def find_ip_address(install_name):
 
 ## Copy files to machine
 def copy_files(ip_address, copy_path, ssh_cred, return_bool = False):
-    file_list = glob.glob("{}*".format(copy_path))
-    for inc in file_list:
-        subprocess.call(["scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i {} {} root@{}:/root/".format(ssh_cred, inc, ip_address)], shell=True)
+    file_list = glob.glob("{}/Tests/*".format(copy_path))
+    subprocess.call(["scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i {} -r {}/* root@{}:~/".format(ssh_cred, copy_path, ip_address)], shell=True)
+    #for inc in file_list:
+    #    subprocess.call(["scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i {} {} root@{}:/root/".format(ssh_cred, inc, ip_address)], shell=True)
     if return_bool == True:
         return file_list
 
@@ -86,8 +89,8 @@ def run_test(ip_address, stage_list, scp_copy_source, ssh_full_path, install_nam
         start_machine(install_name)
         copy_files(ip_address, scp_copy_source, ssh_full_path)
 
-        if subprocess.call(["ssh -o StrictHostKeyChecking=no -i {} root@{} 'ls ~/test_stage{}.py'".format(ssh_full_path, ip_address, counter)], shell=True) == 0:
-            subprocess.call(["ssh -o StrictHostKeyChecking=no -i {} root@{} 'python3 test_stage{}.py'".format(ssh_full_path, ip_address, counter)], shell=True)
+        if subprocess.call(["ssh -o StrictHostKeyChecking=no -i {} root@{} 'ls ~/Tests/test_stage{}*.py > /dev/null'".format(ssh_full_path, ip_address, counter)], shell=True) == 0:
+            subprocess.call(["ssh -o StrictHostKeyChecking=no -i {} root@{} 'python3 ~/Tests/test_stage{}*.py'".format(ssh_full_path, ip_address, counter)], shell=True)
             subprocess.call(["scp -o StrictHostKeyChecking=no -i {} root@{}:~/TEST_RESULT_{} {}Test_Output/".format(ssh_full_path, ip_address, counter, scp_copy_source)], shell=True)
             subprocess.call(["virsh shutdown {}".format(install_name)], shell=True)
             counter = counter + 1
