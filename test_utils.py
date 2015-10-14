@@ -8,6 +8,14 @@ import subprocess
 from random import randint
 
 
+def make_kickstart(machine_full_path, machine_name, ks_repo, ks_keyboard, ks_timezone, ks_rootpass, ks_sshkey, ks_additionalrepo):
+    print("{}/{}.ks".format(machine_full_path, machine_name))
+    f = open("{}/{}.ks".format(machine_full_path, machine_name), "w")
+
+    f.write("url={}\ninstall\nnetwork --bootproto=dhcp\nbootloader --timeout=1\nzerombr\ncleanpart --all --initlabel --drives=vda\nautopart\nkeyboard --xlayouts={}\ntimezone={}\nrootpw={}\nssh-key --username=root \"{}\"\nrepo --name fedora --baseurl=\"\"\nshutdown\n%packages\npython3-blivet\npython3-ipython\n@core\n%end\n%post\n%end".format(ks_repo, ks_keyboard, ks_timezone, ks_rootpass, ks_sshkey, ks_additionalrepo))
+    f.close()
+    return "{}/{}.ks".format(machine_full_path, machine_name)
+
 ## Write issues to file
 def write_issues(ia, action, stage):
     f = open("/root/TEST_RESULT_{}".format(stage), "w")
@@ -124,8 +132,6 @@ def create_new_partition(disk, type_of_part, part_start, part_end, type_of_size 
     out = subprocess.call(["parted --script /dev/{} unit {} 'mkpart {} {} {}'".format(disk, type_of_size, type_of_part, part_start, part_end)], shell=True)
     if out != 0:
         sys.exit(out)
-    else:
-        return
 
 
 ## Format the partition
@@ -141,6 +147,10 @@ def format_new_partition(partition, filesystem):
 def rand_part_size(mds): # max disk size
     return randint(16, mds)
 
+
+## Logical functions
+def assign_logical_number(d_name, part_num):
+    return subprocess.getoutput("LANG=c parted --script /dev/{} print | grep logical | sed -e 's/Sector\ .*//'".format(d_name)).split("\n")[part_num].split(" ")[1]
 
 
 ## LVM ###############################################################################
