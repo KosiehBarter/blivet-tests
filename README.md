@@ -37,7 +37,7 @@ Keyboard = your_locale_here
 Timezone = Your timezone with --utc
 RootPassword = self_explanatory
 
-Note that MachineRam and MachineNoOfDisks are numbers. MachineRam is in Megabytes.
+Note that MachineRam and MachineNoOfDisks are numbers. MachineRam is in Megabytes. Also note that your ini (at this moment) has to be named "blivet-tests.ini" (without quotes!).
 
 # Depedencies / Requirements:
 * python3
