@@ -14,28 +14,28 @@ After install, there is a automatic dynamic timer, which will wait for installat
 There are several tools, test_utils.py and test_utils_blivet.py. Both files include basic gather tools for system and blivet respectively.
 
 Note that in blivet-tests (TODO: WILL BE CHANGED!) are several parameters, which will be gathered upon start of the testing. Whole INI should look like this - ingore the parentheses, they are comments:
-[MACHINE]
-MachineName = Your Machine Name Here
-MachineRam = 2048
-MachineNoOfDisks = 3
-MachineSnapshotName = Your Snapshot Name
-
-[PATHS]
-MachineInstallPath = /path_to_your_dir/any_other_dir/
-MachinePathToKickstart = http://www.direct.link/to/your/kickstart.ks
-MachinePathToISO = /full/path/to/your.iso
-
-[SSH]
-SSHKeyName = name_of_key
-SSHFullPath = /path/to/your/key
-SCPCopySource = /home/kvalek/GitHub/blivet-tests/
-
-[KICKSTART]
-Repository = http://www.direct.link/to/repository/for/installed/RHEL_OR_FEDORA_OR_CENTOS/
-AdditionalRepository = http://www.direct.link/to/additional/repository
-Keyboard = your_locale_here
-Timezone = Your timezone with --utc
-RootPassword = self_explanatory
+* [MACHINE]
+* MachineName = Your Machine Name Here
+* MachineRam = 2048
+* MachineNoOfDisks = 3
+* MachineSnapshotName = Your Snapshot Name
+*
+* [PATHS]
+* MachineInstallPath = /path_to_your_dir/any_other_dir/
+* MachinePathToKickstart = http://www.direct.link/to/your/kickstart.ks
+* MachinePathToISO = /full/path/to/your.iso
+*
+* [SSH]
+* SSHKeyName = name_of_key
+* SSHFullPath = /path/to/your/key
+* SCPCopySource = /home/kvalek/GitHub/blivet-tests/
+*
+* [KICKSTART]
+* Repository = http://www.direct.link/to/repository/for/installed/RHEL_OR_FEDORA_OR_CENTOS/
+* AdditionalRepository = http://www.direct.link/to/additional/repository
+* Keyboard = your_locale_here
+* Timezone = Your timezone with --utc
+* RootPassword = self_explanatory
 
 Note that MachineRam and MachineNoOfDisks are numbers. MachineRam is in Megabytes. Also note that your ini (at this moment) has to be named "blivet-tests.ini" (without quotes!).
 
