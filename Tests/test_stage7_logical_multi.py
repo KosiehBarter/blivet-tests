@@ -30,7 +30,7 @@ for inc in range(4):
         finish = start + 512
 
     ## init objects
-    list_of_tests.append(classes.SystemLogical_Scan('vdb', inc + 1))
+    list_of_tests.append(classes.SystemLogical_Scan('vdb', inc + 1, 1))
     list_of_blivet.append(classes.BlivetInitialization('vdb', inc + 1).child)
 
     ## Store in arrays
