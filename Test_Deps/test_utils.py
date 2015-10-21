@@ -16,6 +16,7 @@ def make_kickstart(machine_full_path, machine_name, ks_repo, ks_keyboard, ks_tim
     f.close()
     return "{}/{}.ks".format(machine_full_path, machine_name)
 
+
 ## Write issues to file
 def write_issues(ia, action, stage):
     f = open("/root/TEST_RESULT_{}".format(stage), "w")
