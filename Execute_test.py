@@ -35,18 +35,23 @@ ks_timezone = conf_object['KICKSTART']['Timezone']
 ks_rootpass = conf_object['KICKSTART']['RootPassword']
 
 
-## Create & start virtual machine
-if(subprocess.call(["LANG=c virsh list --all | grep {}".format(machine_name)], shell=True) != 0):
-    #subprocess.call(["ssh-keygen -t rsa -N \"\" -f {}SSH/{}".format(machine_full_path, machine_name)], shell=True)
-    #ks_sshkey = subprocess.getoutput("cat {}/SSH/{}.pub".format(machine_full_path, machine_name))
-    #ks_full_path = test_utils.make_kickstart(machine_full_path, machine_name, ks_repo, ks_keyboard, ks_timezone, ks_rootpass, ks_sshkey, ks_additionalrepo)
-    virtual_machine.create_machine(machine_name, machine_ram, machine_full_path, machine_ks_full_path, machine_iso_full_path, machine_snap_name, machine_no_of_disks)
+## Create (if does not exist) and start the machine.
 
-if(subprocess.call(["LANG=c virsh list --all | grep {} | grep running".format(machine_name)], shell=True) != 0):
-    virtual_machine.start_machine(machine_name)
 
-ip_address = virtual_machine.find_ip_address(machine_name)
+test_list, deps_list = virtual_machine.get_scp_files(scp_copy_source)
 
-stage_list = virtual_machine.copy_files(ip_address, scp_copy_source, ssh_full_path, True)
+counter = 1
+for inc in test_list:
 
-virtual_machine.run_test(ip_address, stage_list, scp_copy_source, ssh_full_path, machine_name, machine_snap_name)
+    if (subprocess.call(["virsh list --all | grep {}".format(machine_name)],shell=True) == 0):
+        virtual_machine.start_machine(machine_name)
+    else:
+        disk_arg = virtual_machine.create_disks(machine_no_of_disks, machine_full_path, machine_name)
+        virtual_machine.create_machine(machine_name, machine_full_path, disk_arg, machine_iso_full_path, machine_ram, machine_ks_full_path, machine_snap_name)
+
+    ip_address = virtual_machine.find_ip_address(machine_name)                                   ## Get IP address
+    virtual_machine.scp_copy_files(ip_address, ssh_full_path, scp_copy_source, test_list, deps_list, False)     ## Copy files to machine
+    virtual_machine.initiate_test(ip_address, ssh_full_path, counter)
+    virtual_machine.scp_copy_files(ip_address, ssh_full_path, scp_copy_source, test_list, deps_list, True)
+    virtual_machine.revert_machine(machine_name, machine_snap_name)                             ## Revert back machine
+    counter = counter + 1
