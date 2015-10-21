@@ -107,14 +107,15 @@ class SystemPartitionFormatted_Scan(SystemPartition_Scan):
 
 class SystemExtended_Scan(SystemPartition_Scan):
     """ docstring for SystemExtended_Scan"""
-    def __init__(self, d_name, part_num):
+    def __init__(self, d_name, part_num, logical_override = 3):
         """
             :param str d_name: disk's name
             :param int part_num: partition number
+            :param int logical_override: override gathering data when SystemLogical_Scan is performed
         """
         super(SystemExtended_Scan, self).__init__(d_name, part_num)
         self.sd_ex_name = "{}{}".format(d_name, part_num)
-        self.sd_ex_uuid = test_utils.get_disk_props(self.sd_ex_name, 3)
+        self.sd_ex_uuid = test_utils.get_disk_props(self.sd_ex_name, logical_override)
         self.sd_ex_bool = None
         self.sd_ex_size = int(test_utils.cat_data("/sys/block/{}/{}/size".format(self.name, self.sd_ex_name))) * self.p_num_of_sectors
         self.sd_ex_strt = int(test_utils.cat_data("/sys/block/{}/{}/start".format(self.name, self.sd_ex_name)))
@@ -126,14 +127,14 @@ class SystemExtended_Scan(SystemPartition_Scan):
 
 class SystemLogical_Scan(SystemExtended_Scan):
     """ docstring"""
-    def __init__(self, d_name, part_num):
+    def __init__(self, d_name, part_num, logical_override):
         """
             :param
         """
-        super(SystemLogical_Scan, self).__init__(d_name, part_num)
+        super(SystemLogical_Scan, self).__init__(d_name, part_num, logical_override)
         self.sd_lv_name = "{}{}".format(d_name, test_utils.assign_logical_number(d_name, part_num))
         self.sd_lv_logn = test_utils.assign_logical_number(d_name, part_num)
-        self.sd_lv_uuid = None #test_utils.get_disk_props(self.sd_lv_name, 1)
+        self.sd_lv_uuid = test_utils.get_disk_props(self.sd_lv_name, 1)
         self.sd_lv_type = None
         self.sd_lv_nsec = None
         self.sd_lv_size = int(test_utils.cat_data("/sys/block/{}/{}/size".format(self.name, self.sd_lv_name)))
