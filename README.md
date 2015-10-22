@@ -37,7 +37,7 @@ You have to create your own custom \*.ini file which will include following:
 Note that MachineRam and MachineNoOfDisks are numbers. MachineRam is in Megabytes.
 
 # Starting the machine:
-To start the machine, run (with sudo or as root!) python3 Execute_test.py -i <your_file_with_extension.ini>. This will run the installation.
+To start the machine, run (with sudo or as root!) python3 Execute_test.py -i \<your_file_with_extension.ini\>. This will run the installation.
 
 # Depedencies / Requirements:
 * python3
