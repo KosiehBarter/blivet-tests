@@ -13,7 +13,15 @@ import test_utils
 
 ## Parse INI
 conf_object = configparser.ConfigParser()
-conf_object.read('blivet-tests.ini')
+
+## Load file from command line.
+if len(sys.argv) < 3:
+    print ("USAGE:\tsudo python3 Execute_test.py -i <config_file>")
+else:
+    if sys.argv[1] == "-i":
+        config_file = sys.argv[2]
+
+conf_object.read(config_file)
 
 machine_name = conf_object['MACHINE']['MachineName']
 machine_ram = conf_object['MACHINE']['MachineRAM']
