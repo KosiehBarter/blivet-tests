@@ -19,17 +19,17 @@ Note that in blivet-tests (TODO: WILL BE CHANGED!) are several parameters, which
 * MachineRam = 2048
 * MachineNoOfDisks = 3
 * MachineSnapshotName = Your Snapshot Name
-*
+* 
 * [PATHS]
 * MachineInstallPath = /path_to_your_dir/any_other_dir/
 * MachinePathToKickstart = http://www.direct.link/to/your/kickstart.ks
 * MachinePathToISO = /full/path/to/your.iso
-*
+* 
 * [SSH]
 * SSHKeyName = name_of_key
 * SSHFullPath = /path/to/your/key
 * SCPCopySource = /home/kvalek/GitHub/blivet-tests/
-*
+* 
 * [KICKSTART]
 * Repository = http://www.direct.link/to/repository/for/installed/RHEL_OR_FEDORA_OR_CENTOS/
 * AdditionalRepository = http://www.direct.link/to/additional/repository
