@@ -26,7 +26,7 @@ You have to create your own custom \*.ini file which will include following:
 * [SSH]
 * SSHKeyName = name_of_key
 * SSHFullPath = /path/to/your/key
-* SCPCopySource = /home/kvalek/GitHub/blivet-tests/
+* SCPCopySource = /path/to/your/dir/with/tests
 * [KICKSTART]
 * Repository = http://www.direct.link/to/repository/for/installed/RHEL_OR_FEDORA_OR_CENTOS/
 * AdditionalRepository = http://www.direct.link/to/additional/repository
