@@ -24,7 +24,7 @@ You have to create your own custom \*.ini file which will include following:
 * MachineInstallPath = /path_to_your_dir/any_other_dir/
 * MachinePathToKickstart = http://www.direct.link/to/your/kickstart.ks
 * MachinePathToISO = /full/path/to/your.iso
-*
+* 
 * [SSH]
 * SSHKeyName = name_of_key
 * SSHFullPath = /path/to/your/key
