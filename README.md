@@ -14,25 +14,30 @@ After install, there is a automatic dynamic timer, which will wait for installat
 There are several tools, test_utils.py and test_utils_blivet.py. Both files include basic gather tools for system and blivet respectively.
 
 You have to create your own custom \*.ini file which will include following:
-* [MACHINE]
-* MachineName = Your Machine Name Here
-* MachineRam = 2048
-* MachineNoOfDisks = 3
-* MachineSnapshotName = Your Snapshot Name
-* [PATHS]
-* MachineInstallPath = /path_to_your_dir/any_other_dir/
-* MachinePathToKickstart = http://www.direct.link/to/your/kickstart.ks
-* MachinePathToISO = /full/path/to/your.iso
-* [SSH]
-* SSHKeyName = name_of_key
-* SSHFullPath = /path/to/your/key
-* SCPCopySource = /path/to/your/dir/with/tests
-* [KICKSTART]
-* Repository = http://www.direct.link/to/repository/for/installed/RHEL_OR_FEDORA_OR_CENTOS/
-* AdditionalRepository = http://www.direct.link/to/additional/repository
-* Keyboard = your_locale_here
-* Timezone = Your timezone with --utc
-* RootPassword = self_explanatory
+```
+[MACHINE]
+MachineName = Your Machine Name Here
+MachineRam = 2048
+MachineNoOfDisks = 3
+MachineSnapshotName = Your Snapshot Name
+
+[PATHS]
+MachineInstallPath = /path_to_your_dir/any_other_dir/
+MachinePathToKickstart = http://www.direct.link/to/your/kickstart.ks
+MachinePathToISO = /full/path/to/your.iso
+
+[SSH]
+SSHKeyName = name_of_key
+SSHFullPath = /path/to/your/key
+SCPCopySource = /path/to/your/dir/with/tests
+
+[KICKSTART]
+Repository = http://www.direct.link/to/repository/for/installed/RHEL_OR_FEDORA_OR_CENTOS/
+AdditionalRepository = http://www.direct.link/to/additional/repository
+Keyboard = your_locale_here
+Timezone = Your timezone with --utc
+RootPassword = self_explanatory
+```
 
 Note that MachineRam and MachineNoOfDisks are numbers. MachineRam is in Megabytes.
 
