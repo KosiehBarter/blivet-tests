@@ -11,6 +11,7 @@ import virtual_machine
 import configparser
 import test_deps.test_utils
 
+
 def main_execution(machine_name, test_list, deps_list, machine_ram, machine_no_of_disks, machine_snap_name, machine_full_path, machine_ks_full_path, machine_iso_full_path, ssh_key, ssh_full_path, scp_copy_source):
     counter = 1
     for inc in test_list:
@@ -38,7 +39,11 @@ if len(sys.argv) < 3:
     sys.exit(0)
 else:
     if sys.argv[1] == "-i":
-        config_file = sys.argv[2]
+        try:
+            config_file = sys.argv[2]
+        except:
+            print("ERROR: No config INI file specified")
+            sys.exit(1)
 
 conf_object.read(config_file)
 
@@ -56,29 +61,27 @@ ssh_full_path = "{}{}".format(conf_object['SSH']['SSHFullPath'], ssh_key)
 scp_copy_source = conf_object['SSH']['SCPCopySource']
 
 ## Create (if does not exist) and start the machine.
-
-
 test_list, deps_list = virtual_machine.get_scp_files(scp_copy_source)
 
-if subprocess.call(["ls {}".format(ssh_full_path)], shell=True) != 0:
+if subprocess.call(["ls {} > /dev/null".format(ssh_full_path)], shell=True) != 0:
     print("Creating SSH key pair.")
-    subprocess.call(["ssh-keygen -t rsa N \"\" -f {}".format(ssh_full_path)], shell = True)
+    subprocess.call(["ssh-keygen -t rsa -N \"\" -f {}".format(ssh_full_path)], shell = True)
 
 ## Check, if folder for machine exists, if not, create it
 if subprocess.call(["ls {} > /dev/null".format(machine_full_path)], shell=True) != 0:
     subprocess.call(["mkdir {}".format(machine_full_path)], shell=True)
 
 ## Create a kickstart file.
-if subprocess.call(["ls ./example.ks"], shell = True) == 0:
+if subprocess.call(["ls {}{}.ks".format(machine_full_path, machine_name)], shell=True) != 0:
     subprocess.call(["cat ./example.ks > {}{}.ks".format(machine_full_path, machine_name)], shell=True)
     ssh_public_cat = subprocess.getoutput("cat {}.pub".format(ssh_full_path))
     kickstart = open("{}{}.ks".format(machine_full_path, machine_name), "a+")
     kickstart.write("sshkey --username=root \"{}\"".format(ssh_public_cat))
     kickstart.close()
     print("Created {}{}.ks, please upload it to a reachable HTTP / FTP server and specify its url in INI file.".format(machine_full_path, machine_name))
-
-## If all is complete, try to start.
-if (machine_ks_full_path != ""):
-    main_execution(machine_name, test_list, deps_list, machine_ram, machine_no_of_disks, machine_snap_name, machine_full_path, machine_ks_full_path, machine_iso_full_path, ssh_key, ssh_full_path, scp_copy_source)
 else:
-    print("Please specify a kickstart URL in INI file, rows SSHKeyName and SSHFullPath, under SSH.")
+    ## If all is complete, try to start.
+    if (machine_ks_full_path != ""):
+        main_execution(machine_name, test_list, deps_list, machine_ram, machine_no_of_disks, machine_snap_name, machine_full_path, machine_ks_full_path, machine_iso_full_path, ssh_key, ssh_full_path, scp_copy_source)
+    else:
+        print("Please specify a kickstart URL in INI file, rows SSHKeyName and SSHFullPath, under SSH.")

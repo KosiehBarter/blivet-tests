@@ -2,8 +2,8 @@
 ### Part of: Blivet test collection
 ### Author: kvalek@redhat.com
 ### This program is under GPL licence.
-from ..test_deps import classes
-from ..test_deps import test_utils
+import classes
+import test_utils
 
 test_system = classes.SystemDisk_Scan('vdb')
 test_blivet = classes.BlivetInitialization('vdb').disk

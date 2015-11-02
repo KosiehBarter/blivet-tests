@@ -33,14 +33,20 @@ def create_machine(machine_name, machine_full_path, disk_arg, machine_iso_full_p
         time.sleep(1)
 
     subprocess.call(["virsh snapshot-create-as {} {}".format(machine_name, machine_snap_name)], shell=True)
+    subprocess.call(["virsh shutdown {}".format(machine_name)], shell=True)
 
 
 ## Start, and wait for the machine
 def start_machine(machine_name):
     subprocess.call(["virsh start {}".format(machine_name)], shell = True)
 
-    while subprocess.call(["virt-log -d {} | grep bound".format(machine_name)], shell = True) != 0:
-        time.sleep(1)
+    hang_iter = 1
+    while hang_iter == 1:
+        out = subprocess.call(["virt-log -d {} | grep bound\ to".format(machine_name)], shell = True)
+        if out == 0:
+            hang_iter = 0
+        else:
+            time.sleep(1)
 
 
 ## Get machine's IP address.
@@ -64,25 +70,25 @@ def revert_machine(machine_name, machine_snap_name):
 
 ## Return tuple of lists, test stages and deps
 def get_scp_files(scp_copy_source):
-    test_list = glob.glob("{}Tests/*.py".format(scp_copy_source))
-    deps_list = glob.glob("{}Test_Deps/*.py".format(scp_copy_source))
+    test_list = glob.glob("{}tests/*.py".format(scp_copy_source))
+    deps_list = glob.glob("{}test_deps/*.py".format(scp_copy_source))
     return (test_list, deps_list)
 
 
 ## Copy files to machine
 def scp_copy_files(ip_address, ssh_full_path, scp_copy_source, test_list, deps_list, copy_result = False):
     if copy_result == True:
-        if (subprocess.call(["ls {}Test_Results".format(scp_copy_source)], shell=True) != 0):
-            subprocess.call(["mkdir {}Test_Results".format(scp_copy_source)], shell=True)
+        if (subprocess.call(["ls {}test_results".format(scp_copy_source)], shell=True) != 0):
+            subprocess.call(["mkdir {}test_results".format(scp_copy_source)], shell=True)
 
-        subprocess.call(["scp -o StrictHostKeyChecking=no -i {} root@{}:/root/TEST_RESULT* {}Test_Results/".format(ssh_full_path, ip_address, scp_copy_source)], shell=True)
+        subprocess.call(["scp -o StrictHostKeyChecking=no -i {} root@{}:/root/TEST_RESULT* {}test_results/".format(ssh_full_path, ip_address, scp_copy_source)], shell=True)
     ## If copy_result == False
     else:
-        subprocess.call(["ssh -o StrictHostKeyChecking=no -i {} root@{} 'mkdir ~/Tests && mkdir ~/Test_Deps'".format(ssh_full_path, ip_address)], shell=True)
-        subprocess.call(["scp -o StrictHostKeyChecking=no -i {} {} root@{}:~/Tests/".format(ssh_full_path, " ".join(test_list), ip_address)], shell=True)
-        subprocess.call(["scp -o StrictHostKeyChecking=no -i {} {} root@{}:~/Test_Deps/".format(ssh_full_path, " ".join(deps_list), ip_address)], shell=True)
+        subprocess.call(["ssh -o StrictHostKeyChecking=no -i {} root@{} 'mkdir ~/tests && mkdir ~/test_teps'".format(ssh_full_path, ip_address)], shell=True)
+        subprocess.call(["scp -o StrictHostKeyChecking=no -i {} {} root@{}:~/tests/".format(ssh_full_path, " ".join(test_list), ip_address)], shell=True)
+        subprocess.call(["scp -o StrictHostKeyChecking=no -i {} {} root@{}:~/tests/".format(ssh_full_path, " ".join(deps_list), ip_address)], shell=True)
 
 
 ## Initiate test stage
 def initiate_test(ip_address, ssh_full_path, test_num):
-    subprocess.call(["ssh -o StrictHostKeyChecking=no -i {} root@{} 'python3 /root/Tests/test_stage{}*'".format(ssh_full_path, ip_address, test_num)], shell=True)
+    subprocess.call(["ssh -o StrictHostKeyChecking=no -i {} root@{} 'python3 /root/tests/test_stage{}*'".format(ssh_full_path, ip_address, test_num)], shell=True)

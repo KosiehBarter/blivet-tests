@@ -2,14 +2,8 @@
 ### Part of: Blivet test collection
 ### Author: kvalek@redhat.com
 ### This program is under GPL licence.
-import sys
-sys.path.append("..")
-sys.path.append("./Test_Deps")
-
 import classes
 import test_utils
-
-
 test_utils.create_new_alloc_table("vdb")
 
 
