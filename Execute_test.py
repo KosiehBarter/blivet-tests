@@ -15,13 +15,12 @@ import test_deps.test_utils
 def main_execution(machine_name, test_list, deps_list, machine_ram, machine_no_of_disks, machine_snap_name, machine_full_path, machine_ks_full_path, machine_iso_full_path, ssh_key, ssh_full_path, scp_copy_source):
     counter = 1
     for inc in test_list:
-
-        if (subprocess.call(["virsh list --all | grep {}".format(machine_name)],shell=True) == 0):
-            virtual_machine.start_machine(machine_name)
-        else:
+        print("TEST_NUM: {}".format(counter))
+        if (subprocess.call(["virsh list --all | grep {}".format(machine_name)],shell=True) != 0):
             disk_arg = virtual_machine.create_disks(machine_no_of_disks, machine_full_path, machine_name)
             virtual_machine.create_machine(machine_name, machine_full_path, disk_arg, machine_iso_full_path, machine_ram, machine_ks_full_path, machine_snap_name)
 
+        virtual_machine.start_machine(machine_name)
         ip_address = virtual_machine.find_ip_address(machine_name)                                   ## Get IP address
         virtual_machine.scp_copy_files(ip_address, ssh_full_path, scp_copy_source, test_list, deps_list, False)     ## Copy files to machine
         virtual_machine.initiate_test(ip_address, ssh_full_path, counter)
