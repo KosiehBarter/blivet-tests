@@ -40,6 +40,7 @@ RootPassword = self_explanatory
 ```
 
 Note that MachineRam and MachineNoOfDisks are numbers. MachineRam is in Megabytes.
+Also note that KICKSTART section is designed for future expansion.
 
 # Starting the machine:
 To start the machine, run (with sudo or as root!) python3 Execute_test.py -i \<your_file_with_extension.ini\>. This will run the installation.
