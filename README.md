@@ -30,17 +30,9 @@ MachinePathToISO = /full/path/to/your.iso
 SSHKeyName = name_of_key
 SSHFullPath = /path/to/your/key
 SCPCopySource = /path/to/your/dir/with/tests
-
-[KICKSTART]
-Repository = http://www.direct.link/to/repository/for/installed/RHEL_OR_FEDORA_OR_CENTOS/
-AdditionalRepository = http://www.direct.link/to/additional/repository
-Keyboard = your_locale_here
-Timezone = Your timezone with --utc
-RootPassword = self_explanatory
 ```
 
 Note that MachineRam and MachineNoOfDisks are numbers. MachineRam is in Megabytes.
-Also note that KICKSTART section is designed for future expansion.
 
 # Starting the machine:
 To start the machine, run (with sudo or as root!) python3 Execute_test.py -i \<your_file_with_extension.ini\>. This will run the installation.
