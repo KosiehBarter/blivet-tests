@@ -6,6 +6,22 @@
 import sys
 import subprocess
 from random import randint
+import logging
+
+
+def init_logging(type_of_logging, loginst_inp = None, init_bool = False):
+    log_types = [logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR, logging.CRITICAL]
+    if init_bool == True:
+        loginst = logging.getLogger("blivet-tests")
+        logfile = logging.FileHandler("blivet-tests.log")
+        logform = logging.Formatter('%(asctime)s: %(levelname)s:\t %(message)s')
+        logfile.setFormatter(logform)
+        loginst.addHandler(logfile)
+    else:
+        loginst = loginst_inp
+    loginst.setLevel(log_types[type_of_logging])
+    return loginst
+
 
 
 def make_kickstart(machine_full_path, machine_name, ks_repo, ks_keyboard, ks_timezone, ks_rootpass, ks_sshkey, ks_additionalrepo):
