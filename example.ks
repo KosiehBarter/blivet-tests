@@ -1,5 +1,5 @@
 #version=DEVEL
-url --url="http://dl.fedoraproject.org/pub/fedora/linux/development/$releasever/$basearch/os/"
+url --url="http://download.eng.brq.redhat.com/pub/fedora/fedora-alt/stage/23_TC11/Server/x86_64/os/"
 
 install
 network --bootproto=dhcp
