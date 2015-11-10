@@ -9,11 +9,11 @@ from random import randint
 import logging
 
 
-def init_logging(type_of_logging, loginst_inp = None, init_bool = False):
+def init_logging(type_of_logging, logfile_name = "blivet-tests", loginst_inp = None, init_bool = False):
     log_types = [logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR, logging.CRITICAL]
     if init_bool == True:
         loginst = logging.getLogger("blivet-tests")
-        logfile = logging.FileHandler("blivet-tests.log")
+        logfile = logging.FileHandler("{}.log".format(logfile_name))
         logform = logging.Formatter('%(asctime)s: %(levelname)s:\t %(message)s')
         logfile.setFormatter(logform)
         loginst.addHandler(logfile)
@@ -21,16 +21,6 @@ def init_logging(type_of_logging, loginst_inp = None, init_bool = False):
         loginst = loginst_inp
     loginst.setLevel(log_types[type_of_logging])
     return loginst
-
-
-
-def make_kickstart(machine_full_path, machine_name, ks_repo, ks_keyboard, ks_timezone, ks_rootpass, ks_sshkey, ks_additionalrepo):
-    print("{}/{}.ks".format(machine_full_path, machine_name))
-    f = open("{}/{}.ks".format(machine_full_path, machine_name), "w")
-
-    f.write("url={}\ninstall\nnetwork --bootproto=dhcp\nbootloader --timeout=1\nzerombr\ncleanpart --all --initlabel --drives=vda\nautopart\nkeyboard --xlayouts={}\ntimezone={}\nrootpw={}\nssh-key --username=root \"{}\"\nrepo --name fedora --baseurl=\"\"\nshutdown\n%packages\npython3-blivet\npython3-ipython\n@core\n%end\n%post\n%end".format(ks_repo, ks_keyboard, ks_timezone, ks_rootpass, ks_sshkey, ks_additionalrepo))
-    f.close()
-    return "{}/{}.ks".format(machine_full_path, machine_name)
 
 
 ## Write issues to file

@@ -7,10 +7,11 @@ import subprocess
 import glob
 import time
 import re
+import sys
 
 
 ## Create array of disk arguments
-def create_disks(additional_disks, machine_full_path, machine_name):
+def create_disks(additional_disks, machine_full_path, machine_name, loginst):
     disk_list = []
     letter_counter = 98
     for inc in range(additional_disks):
@@ -24,7 +25,7 @@ def create_disks(additional_disks, machine_full_path, machine_name):
 ## Create and install machine
 def create_machine(
         machine_name, machine_full_path, disk_arg, machine_iso_full_path,
-        machine_ram, machine_ks_full_path, machine_snap_name):
+        machine_ram, machine_ks_full_path, machine_snap_name, loginst):
     subprocess.call([
     "virt-install --name {}\
      --disk \"{}{}_vda,size=8\" {}\
@@ -53,86 +54,80 @@ def create_machine(
 
 
 ## Start, and wait for the machine
-def start_machine(machine_name):
+def start_machine(machine_name, loginst):
     subprocess.call(["virsh start {}".format(machine_name)], shell = True)
 
-    hang_iter = 1
+    """hang_iter = 1
     while hang_iter == 1:
         out = subprocess.call([
             "virt-log -d {} | grep bound\ to".format(machine_name)], shell=True)
         if out == 0:
             hang_iter = 0
         else:
-            time.sleep(1)
-
-
-## Get machine's IP address.
-def find_ip_address(machine_name):
-    ## Regex the IP address from log and store it to variable
-    ip_address = subprocess.getoutput(
-        "LANG=c virt-log -d {} | grep bound | tail -n 1".format(machine_name))
-    print(ip_address)
-    vystup = re.search(r'.*to\ ([0-9]*.[0-9]*.[0-9*]*.[0-9]*).*', ip_address)
-    if vystup:
-        return vystup.group(1)
+            time.sleep(1)"""
 
 
 ## Revert back machine
-def revert_machine(machine_name, machine_snap_name):
+def revert_machine(machine_name, machine_snap_name, loginst):
     out = subprocess.call(["virsh snapshot-revert {} {}".format(
         machine_name, machine_snap_name)], shell=True)
     if out != 0:
-        print(
-            "ERROR:\tSnapshot \"{}\" for machine \"{}\" failed to revert.".format(
-                machine_snap_name, machine_name))
+        loginst.error("Snapshot \"{}\" for machine \"{}\" "
+            "failed to revert.".format(machine_snap_name, machine_name))
     else:
-        print(
-        "Machine \"{}\" successfully reverted to snapshot \"{}\".".format(
-            machine_name, machine_snap_name))
+        loginst.info("Machine \"{}\" successfully "
+            "reverted to snapshot \"{}\".".format(machine_name, machine_snap_name))
 
 
-## Return tuple of lists, test stages and deps
-def get_scp_files(scp_copy_source):
-    test_list = glob.glob("{}tests/*.py".format(scp_copy_source))
-    deps_list = glob.glob("{}test_deps/*.py".format(scp_copy_source))
-    return (test_list, deps_list)
-
-
-## Copy files to machine
-def scp_copy_files(
-        ip_address, ssh_full_path, scp_copy_source,
-        test_list, deps_list, copy_result=False):
-    if copy_result == True:
-        if (subprocess.call([
-                "ls {}test_results".format(scp_copy_source)], shell=True) != 0):
-            subprocess.call([
-                "mkdir {}test_results".format(scp_copy_source)], shell=True)
-
-        subprocess.call([
-            "scp -o \"StrictHostKeyChecking no\"\
-            -i {} root@{}:/root/TEST_RESULT*\
-            {}test_results/".format(
-                ssh_full_path, ip_address, scp_copy_source)], shell=True)
-    ## If copy_result == False
+def get_files(machine_copy_path, loginst):
+    test_list = sorted(glob.glob("{}tests/*.py".format(machine_copy_path)))
+    deps_list = sorted(glob.glob("{}test_deps/*.py".format(machine_copy_path)))
+    ## Special append for run_test.sh
+    deps_list.append("{}test_deps/run_test.sh".format(machine_copy_path))
+    if test_list == [] and deps_list == []:
+        loginst.error("No files in {}: - tests/ OR test_deps/".format(machine_copy_path))
     else:
-        subprocess.call([
-            "ssh -o \"StrictHostKeyChecking no\"\
-            -i {} root@{} 'mkdir ~/tests && mkdir ~/test_teps'".format(
-                ssh_full_path, ip_address)], shell=True)
-        subprocess.call([
-            "scp -o \"StrictHostKeyChecking no\"\
-            -i {} {} root@{}:~/tests/".format(
-                ssh_full_path, " ".join(test_list), ip_address)], shell=True)
-        subprocess.call([
-            "scp -o \"StrictHostKeyChecking no\"\
-            -i {} {} root@{}:~/tests/".format(
-                ssh_full_path, " ".join(deps_list), ip_address)], shell=True)
+        loginst.info("Files successfully gathered.")
+        return (test_list, deps_list)
 
 
-## Initiate test stage
-def initiate_test(ip_address, ssh_full_path, test_num):
-    subprocess.call([
-        "ssh -o \"StrictHostKeyChecking no\"\
-        -i {} root@{}\
-        'python3 /root/tests/test_stage{}*'".format(
-            ssh_full_path, ip_address, test_num)], shell=True)
+def copy_files(
+    files_to_copy, machine_name, machine_copy_path,
+    loginst, direction = False, copyback_dir = "test_results"):
+
+    if direction == True:
+        command = "virt-copy-in -d {}".format(machine_name)
+    else:
+        command = "virt-copy-out -d {} /root/".format(machine_name)
+
+    action_array = []
+    if type(files_to_copy) == str:
+        action_array.append(files_to_copy)
+    else:
+        action_array = files_to_copy
+
+    for inc in action_array:
+        if direction == True:
+            out = subprocess.call(["{} {} /root/".format(command, inc)], shell=True)
+            loginst.debug("Copied: {} {} /root/".format(command, inc))
+        else:
+            out = subprocess.call(["{}{} {}{}".format(
+                command, inc, machine_copy_path, copyback_dir)], shell=True)
+
+    return out
+
+
+def wait_for_copyback(counter, machine_name, machine_copy_path, loginst, direction):
+    enc = 1
+    time_limit = 0
+    while enc != 0:
+        exstat = copy_files("TEST_RESULT_{}".format(counter), machine_name, machine_copy_path, loginst, False)
+        if exstat == 0:
+            loginst.debug("File copied: TEST_RESULT_{}".format(counter))
+            enc = 0
+        elif time_limit == 60:
+            loginst.error("Waited too long - file is not present on the system. Quitting.")
+            sys.exit(1)
+        else:
+            time.sleep(1)
+            time_limit = time_limit + 1

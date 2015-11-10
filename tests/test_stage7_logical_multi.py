@@ -5,7 +5,6 @@
 import classes
 import test_utils
 
-loginst_test = test_utils.init_logging(0, None, True)
 test_utils.create_new_alloc_table("vdb")
 
 ## Multi partition test
@@ -17,7 +16,6 @@ list_of_tests = []
 list_of_blivet = []
 list_of_ia = []
 
-loginst_test.debug("Setting up SystemLogical_Scan.")
 test_utils.create_new_partition("vdb", "extended", start, -1)
 for inc in range(4):
     loginst_test.debug("Setting up Logical partition {}".format(inc + 1))
@@ -33,7 +31,6 @@ for inc in range(4):
     list_of_blivet.append(classes.BlivetInitialization('vdb', inc + 1).child)
 
     ## Store in arrays
-    loginst.debug("Comparing SystemLogical_Scan - partition {} with Blivet instance.".format(inc + 1))
     list_of_ia.append(test_utils.test(list_of_tests[inc], list_of_blivet[inc]))
 
     ## Store in file.
