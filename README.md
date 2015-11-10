@@ -37,6 +37,9 @@ Note that MachineRam and MachineNoOfDisks are numbers. MachineRam is in Megabyte
 # Starting the machine:
 To start the machine, run (with sudo or as root!) python3 Execute_test.py -i \<your_file_with_extension.ini\>. This will run the installation.
 
+# WIKI for creating tests:
+https://github.com/KosiehBarter/blivet-tests/wiki
+
 # Depedencies / Requirements:
 * python3
 * virsh
