@@ -18,7 +18,6 @@ list_of_ia = []
 
 test_utils.create_new_partition("vdb", "extended", start, -1)
 for inc in range(4):
-    loginst_test.debug("Setting up Logical partition {}".format(inc + 1))
     if inc == 3:
         test_utils.create_new_partition("vdb", "logical", start + 1, -1)
     else:

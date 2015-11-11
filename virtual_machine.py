@@ -6,8 +6,9 @@
 import subprocess
 import glob
 import time
-import re
 import sys
+
+TEST_LIMIT = 10
 
 
 ## Create array of disk arguments
@@ -26,15 +27,21 @@ def create_disks(additional_disks, machine_full_path, machine_name, loginst):
 def create_machine(
         machine_name, machine_full_path, disk_arg, machine_iso_full_path,
         machine_ram, machine_ks_full_path, machine_snap_name, loginst):
-    subprocess.call([
-    "virt-install --name {}\
-     --disk \"{}{}_vda,size=8\" {}\
-     --location {}\
-     --graphics vnc,listen=0.0.0.0\
-     --noautoconsole --ram {} -x ks={}".format(
-     machine_name, machine_full_path,
-     machine_name, disk_arg, machine_iso_full_path,
-     machine_ram, machine_ks_full_path)], shell = True)
+    loginst.info("Attempting to create virtual machine.")
+    out = subprocess.call([
+            "virt-install --name {}"
+             "--disk \"{}{}_vda,size=8\" {}"
+             "--location {}"
+             "--graphics vnc,listen=0.0.0.0"
+             "--noautoconsole --ram {} -x ks={}".format(
+                 machine_name, machine_full_path,
+                 machine_name, disk_arg, machine_iso_full_path,
+                 machine_ram, machine_ks_full_path)], shell = True)
+    if out == 0:
+        loginst.info("Machine created successfully.")
+    else:
+        loginst.error("Machine failed to create. Maybe it already exists?")
+        sys.exit(1)
 
     out = 0
     while out != 0:
@@ -54,17 +61,8 @@ def create_machine(
 
 
 ## Start, and wait for the machine
-def start_machine(machine_name, loginst):
+def start_machine(machine_name):
     subprocess.call(["virsh start {}".format(machine_name)], shell = True)
-
-    """hang_iter = 1
-    while hang_iter == 1:
-        out = subprocess.call([
-            "virt-log -d {} | grep bound\ to".format(machine_name)], shell=True)
-        if out == 0:
-            hang_iter = 0
-        else:
-            time.sleep(1)"""
 
 
 ## Revert back machine
@@ -117,17 +115,17 @@ def copy_files(
     return out
 
 
-def wait_for_copyback(counter, machine_name, machine_copy_path, loginst, direction):
+def wait_for_copyback(counter, machine_name, machine_copy_path, loginst):
     enc = 1
-    time_limit = 0
+    wait_time = 0
     while enc != 0:
         exstat = copy_files("TEST_RESULT_{}".format(counter), machine_name, machine_copy_path, loginst, False)
         if exstat == 0:
             loginst.debug("File copied: TEST_RESULT_{}".format(counter))
             enc = 0
-        elif time_limit == 60:
+        elif wait_time == TEST_LIMIT:
             loginst.error("Waited too long - file is not present on the system. Quitting.")
             sys.exit(1)
         else:
             time.sleep(1)
-            time_limit = time_limit + 1
+            wait_time = wait_time + 1

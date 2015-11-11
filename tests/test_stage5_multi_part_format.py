@@ -19,7 +19,6 @@ list_of_blivet = []
 list_of_ia = []
 
 for inc in range(4):
-    loginst_test.debug("Setting partition {}".format(inc + 1))
     if inc == 3:
         test_utils.create_new_partition("vdb", "primary", start, -1)
     else:
@@ -34,7 +33,6 @@ for inc in range(4):
     list_of_blivet.append(classes.BlivetInitialization('vdb', inc + 1).child)
 
     ## Store in arrays
-        "with Blivet instance.".format(inc + 1))
     list_of_ia.append(test_utils.test(list_of_tests[inc], list_of_blivet[inc]))
 
     ## Store in file.
