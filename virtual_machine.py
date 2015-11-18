@@ -118,17 +118,16 @@ def copy_files(
 def wait_for_copyback(counter, machine_name, machine_copy_path, loginst, copyback_files):
     enc = 1
     wait_time = 0
-    while enc != 0:
 
-        exstat1 = copy_files(copyback_files[0], machine_name, machine_copy_path, loginst, False)
-        exstat2 = copy_files(copyback_files[1], machine_name, machine_copy_path, loginst, False)
-
-        if exstat1 == 0 and exstat2 == 0:
-            loginst.debug("Files copied:\t{} {}".format(copyback_files[0], copyback_files[1]))
-            enc = 0
-        elif wait_time == TEST_LIMIT:
-            loginst.error("Waited too long - file is not present"
-            " on the system. Quitting.\nFailed on: TEST_RESULT_{}".format(counter))
-        else:
-            time.sleep(1)
-            wait_time = wait_time + 1
+    for inc in range(len(copyback_files)):
+        status = 1
+        while status != 0:
+            status = copy_files(copyback_files[inc], machine_name, machine_copy_path, loginst, False)
+            if status == 0:
+                wait_time = 0
+                loginst.debug("Copied:\t{}\tat time: {}".format(copyback_files[inc], wait_time))
+            else:
+                wait_time = wait_time + 1
+                if wait_time >= TEST_LIMIT:
+                    loginst.error("File failed to copy:\t\"{}\"".format(copyback_files[inc]))
+                    break
