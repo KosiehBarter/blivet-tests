@@ -20,22 +20,28 @@ from random import randint
 import logging
 
 
-def init_logging(log_name, log_level, stage_num = None):
+def init_logging(log_name, log_level, stage_num = None, connection = None):
+
+    if connection == None:
+        connection = log_name
 
     if log_name == "blivet":
         import blivet
         loginstance = blivet.storage_log.logging
+        file_name = "{}_{}_{}".format(log_name, stage_num, connection)
     else:
+        if stage_num != None:
+            file_name = "{}_{}".format(log_name, stage_num)
+        else:
+            file_name = "{}".format(log_name)
         loginstance = logging
 
-    loginst = loginstance.getLogger(log_name)
+    if connection == None:
+        connection = log_name
+
+    loginst = loginstance.getLogger(connection)
     loginst.setLevel(loginstance.DEBUG)
     logform = loginstance.Formatter('%(asctime)s: %(levelname)s:\t %(message)s')
-
-    if stage_num != None:
-        file_name = "{}_{}".format(log_name, stage_num)
-    else:
-        file_name = "{}".format(log_name)
 
     filehan = loginstance.FileHandler("{}.log".format(file_name))
     filehan.setFormatter(logform)
