@@ -4,12 +4,32 @@
 ### This program is under GPL licence.
 import classes
 import test_utils
-log_bl = test_utils.init_logging("blivet", 0, 6)
 
-test_utils.create_new_alloc_table("vdb")
-test_utils.create_new_partition("vdb", "extended", 1, -1)
+def main(disk):
 
-tsep = classes.SystemExtended_Scan('vdb', 1)
-tbep = classes.BlivetInitialization('vdb', 1).child
-ia = test_utils.test(tsep, tbep)
-test_utils.write_issues(ia, "Extended partition test", 6)
+    log_bl = test_utils.init_logging("blivet", 0, 6)
+    log_bl_prg = test_utils.init_logging("blivet", 0, 6, "program")
+    log_stage = test_utils.init_logging("stage", 0, 6)
+
+    log_stage.info("Starting test: {}".format(__file__))
+    try:
+        test_utils.create_new_alloc_table(disk)
+        test_utils.create_new_partition(disk, "extended", 1, -1)
+
+        log_stage.info("Fetching system scan of disk:\t{}".format(disk))
+        tsep = classes.SystemExtended_Scan(disk, 1)
+
+        log_stage.info("Fetching blivet scan of disk:\t{}".format(disk))
+        tbep = classes.BlivetInitialization(disk, 1).child
+
+        log_stage.info("Comparing objects.")
+        ia = test_utils.test(tsep, tbep)
+
+        log_stage.info("Writting issues.")
+        test_utils.write_issues(ia, "Extended partition test", 6)
+
+    except Exception as error_mess:
+        log_stage.error(error_mess)
+
+if __name__ == '__main__':
+    main('vdb')

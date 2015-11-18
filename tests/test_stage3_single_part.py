@@ -4,13 +4,33 @@
 ### This program is under GPL licence.
 import classes
 import test_utils
-log_bl = test_utils.init_logging("blivet", 0, 3)
 
-test_utils.create_new_alloc_table("vdb")
-test_utils.create_new_partition("vdb", "primary", 1, -1)
+def main(disk):
 
+    log_bl = test_utils.init_logging("blivet", 0, 3)
+    log_bl_prg = test_utils.init_logging("blivet", 0, 3, "program")
+    log_stage = test_utils.init_logging("stage", 0, 3)
 
-test_blivet_partition = classes.BlivetInitialization('vdb', 1).child
-test_system_partition = classes.SystemPartition_Scan('vdb', 1)
-ia = test_utils.test(test_system_partition, test_blivet_partition)
-test_utils.write_issues(ia, "Partitioned disk", 3)
+    log_stage.info("Starting test: {}".format(__file__))
+    try:
+        log_stage.info("Preparing disk:\t{}".format(disk))
+        test_utils.create_new_alloc_table(disk)
+        test_utils.create_new_partition(disk, "primary", 1, -1)
+
+        log_stage.info("Fetching system scan of disk:\t{}".format(disk))
+        test_system_partition = classes.SystemPartition_Scan(disk, 1)
+
+        log_stage.info("Fetching blivet scan of disk:\t{}".format(disk))
+        test_blivet_partition = classes.BlivetInitialization(disk, 1).child
+
+        log_stage.info("Comparing objects.")
+        ia = test_utils.test(test_system_partition, test_blivet_partition)
+
+        log_stage.info("Writting issues.")
+        test_utils.write_issues(ia, "Partitioned disk", 3)
+
+    except Exception as error_mess:
+        log_stage.error(error_mess)
+
+if __name__ == '__main__':
+    main('vdb')
