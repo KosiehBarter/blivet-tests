@@ -44,7 +44,7 @@ def main_execution(
         virtual_machine.start_machine(machine_name)
         loginst.info("Machine started, tests will be executed on start.")
         loginst.info("Waiting for file copyback.")
-        virtual_machine.wait_for_copyback(counter, machine_name, machine_copy_path, loginst, ["TEST_RESULT_{}".format(counter), "blivet_{}.log".format(counter)])
+        virtual_machine.wait_for_copyback(counter, machine_name, machine_copy_path, loginst, ["TEST_RESULT_{}".format(counter), "blivet_{}_blivet.log".format(counter), "blivet_{}_program.log".format(counter), "stage_{}.log".format(counter)])
 
         loginst.info("Results copied, reverting machine to {}".format(machine_snap_name))
         virtual_machine.revert_machine(machine_name, machine_snap_name, loginst)
