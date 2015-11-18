@@ -16,20 +16,17 @@ There are several tools, test_utils.py and test_utils_blivet.py. Both files incl
 You have to create your own custom \*.ini file which will include following:
 ```
 [MACHINE]
-MachineName = Your Machine Name Here
+MachineName = YourMachineName
 MachineRam = 2048
 MachineNoOfDisks = 3
-MachineSnapshotName = Your Snapshot Name
+MachineSnapshotName = MySnapshot
 
 [PATHS]
-MachineInstallPath = /path_to_your_dir/any_other_dir/
-MachinePathToKickstart = http://www.direct.link/to/your/kickstart.ks
-MachinePathToISO = /full/path/to/your.iso
+MachineInstallPath = /your/install/path/
+MachinePathToKickstart = http://your.server/kickstart.ks
+MachinePathToISO = /your/path/to/cd_image.iso
+MachineCopySource = /your/path/where/files/will/be/copied/from/
 
-[SSH]
-SSHKeyName = name_of_key
-SSHFullPath = /path/to/your/key
-SCPCopySource = /path/to/your/dir/with/tests
 ```
 
 Note that MachineRam and MachineNoOfDisks are numbers. MachineRam is in Megabytes.
