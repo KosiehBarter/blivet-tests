@@ -44,7 +44,7 @@ def main_execution(
         virtual_machine.start_machine(machine_name)
         loginst.info("Machine started, tests will be executed on start.")
         loginst.info("Waiting for file copyback.")
-        virtual_machine.wait_for_copyback(counter, machine_name, machine_copy_path, loginst)
+        virtual_machine.wait_for_copyback(counter, machine_name, machine_copy_path, loginst, ["TEST_RESULT_{}".format(counter), "blivet_{}.log".format(counter)])
 
         loginst.info("Results copied, reverting machine to {}".format(machine_snap_name))
         virtual_machine.revert_machine(machine_name, machine_snap_name, loginst)
@@ -66,7 +66,7 @@ else:
             print("ERROR: No config INI file specified")
             sys.exit(1)
 
-loginst = test_utils.init_logging(0, CONFIG_FILE.split(".")[0], None, True)
+loginst = test_utils.init_logging(CONFIG_FILE.split(".")[0], 0)
 
 loginst.info("\nStarting testing instance using: {}".format(CONFIG_FILE))
 CONF_OBJECT.read(CONFIG_FILE)

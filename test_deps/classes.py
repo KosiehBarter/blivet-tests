@@ -17,7 +17,7 @@ import blivet
 class BlivetInitialization(object):
     """ This basic class initializes Blivet and returns
         Blivet object, performs Blivet().reset()"""
-    def __init__(self, disk, child_index = None):
+    def __init__(self, disk, child_index = None, stage_num = None):
         """
             :param str disk: disk's name
             :param bool child: If TRUE, get disk's partition / child object
@@ -29,7 +29,6 @@ class BlivetInitialization(object):
         self.disk = self.object.devicetree.getDeviceByName(disk)
         if child_index != None:
             self.child = self.object.devicetree.getChildren(self.disk)[child_index - 1]
-
 
 class SystemDisk_Scan(object):
     """ Contains all data regarding to a disk.

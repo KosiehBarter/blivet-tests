@@ -29,10 +29,10 @@ def create_machine(
         machine_ram, machine_ks_full_path, machine_snap_name, loginst):
     loginst.info("Attempting to create virtual machine.")
     out = subprocess.call([
-            "virt-install --name {}"
-             "--disk \"{}{}_vda,size=8\" {}"
-             "--location {}"
-             "--graphics vnc,listen=0.0.0.0"
+            "virt-install --name {} "
+             "--disk \"{}{}_vda,size=8\" {} "
+             "--location {} "
+             "--graphics vnc,listen=0.0.0.0 "
              "--noautoconsole --ram {} -x ks={}".format(
                  machine_name, machine_full_path,
                  machine_name, disk_arg, machine_iso_full_path,
@@ -115,17 +115,20 @@ def copy_files(
     return out
 
 
-def wait_for_copyback(counter, machine_name, machine_copy_path, loginst):
+def wait_for_copyback(counter, machine_name, machine_copy_path, loginst, copyback_files):
     enc = 1
     wait_time = 0
     while enc != 0:
-        exstat = copy_files("TEST_RESULT_{}".format(counter), machine_name, machine_copy_path, loginst, False)
-        if exstat == 0:
-            loginst.debug("File copied: TEST_RESULT_{}".format(counter))
+
+        exstat1 = copy_files(copyback_files[0], machine_name, machine_copy_path, loginst, False)
+        exstat2 = copy_files(copyback_files[1], machine_name, machine_copy_path, loginst, False)
+
+        if exstat1 == 0 and exstat2 == 0:
+            loginst.debug("Files copied:\t{} {}".format(copyback_files[0], copyback_files[1]))
             enc = 0
         elif wait_time == TEST_LIMIT:
-            loginst.error("Waited too long - file is not present on the system. Quitting.")
-            sys.exit(1)
+            loginst.error("Waited too long - file is not present"
+            " on the system. Quitting.\nFailed on: TEST_RESULT_{}".format(counter))
         else:
             time.sleep(1)
             wait_time = wait_time + 1

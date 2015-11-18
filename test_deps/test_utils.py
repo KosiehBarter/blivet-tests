@@ -3,25 +3,46 @@
 ### Author: kvalek@redhat.com
 ### This program is under GPL licence.
 
+
+"""<vtrefny> log_handler = logging.FileHandler(log_file)
+<vtrefny>     log_handler.setLevel(logging_level)
+<vtrefny>     formatter = logging.Formatter('%(levelname)s:%(name)s: %(message)s')
+<vtrefny>     log_handler.setFormatter(formatter)
+<vtrefny>     logger = logging.getLogger(component)
+<vtrefny>     logger.addHandler(log_handler)
+<vtrefny>     logger.setLevel(logging_level)"""
+
+
+
 import sys
 import subprocess
 from random import randint
 import logging
 
 
-def init_logging(type_of_logging, logfile_name = "blivet-tests", loginst_inp = None, init_bool = False):
-    log_types = [logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR, logging.CRITICAL]
-    if init_bool == True:
-        loginst = logging.getLogger("blivet-tests")
-        logfile = logging.FileHandler("{}.log".format(logfile_name))
-        logform = logging.Formatter('%(asctime)s: %(levelname)s:\t %(message)s')
-        logfile.setFormatter(logform)
-        loginst.addHandler(logfile)
-    else:
-        loginst = loginst_inp
-    loginst.setLevel(log_types[type_of_logging])
-    return loginst
+def init_logging(log_name, log_level, stage_num = None):
 
+    if log_name == "blivet":
+        import blivet
+        loginstance = blivet.storage_log.logging
+    else:
+        loginstance = logging
+
+    loginst = loginstance.getLogger(log_name)
+    loginst.setLevel(loginstance.DEBUG)
+    logform = loginstance.Formatter('%(asctime)s: %(levelname)s:\t %(message)s')
+
+    if stage_num != None:
+        file_name = "{}_{}".format(log_name, stage_num)
+    else:
+        file_name = "{}".format(log_name)
+
+    filehan = loginstance.FileHandler("{}.log".format(file_name))
+    filehan.setFormatter(logform)
+
+    loginst.addHandler(filehan)
+
+    return loginst
 
 ## Write issues to file
 def write_issues(ia, action, stage):

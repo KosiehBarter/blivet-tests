@@ -4,6 +4,7 @@
 ### This program is under GPL licence.
 import classes
 import test_utils
+log_bl = test_utils.init_logging("blivet", 0, 7)
 
 test_utils.create_new_alloc_table("vdb")
 

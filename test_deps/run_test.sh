@@ -1,3 +1,5 @@
 #!/bin/bash
 
-/usr/bin/python3 /root/test_stage* && /usr/sbin/poweroff
+cd /root/
+test_to_run=`ls test_stage*.py`
+python3 $test_to_run && poweroff
