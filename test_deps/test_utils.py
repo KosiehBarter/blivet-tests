@@ -19,7 +19,7 @@ import subprocess
 from random import randint
 import logging
 
-
+## Init logging to monitor tests
 def init_logging(log_name, log_level, stage_num = None, connection = None):
 
     if connection == None:
@@ -50,6 +50,12 @@ def init_logging(log_name, log_level, stage_num = None, connection = None):
 
     return loginst
 
+
+## Get stage number from file
+def get_stage_num(input_name):
+    return int(input_name.split("_")[2])
+
+
 ## Write issues to file
 def write_issues(ia, action, stage):
     f = open("/root/TEST_RESULT_{}".format(stage), "w")
@@ -69,7 +75,8 @@ def test(sys_scan, blv_scan):
     for inc in sys_scan.get_attributes():
         if  (type(inc) == str):
             if(getattr(sys_scan, inc) != getattr(blv_scan, inc)):
-                ia.append("FAIL:\t{} != {}".format(getattr(sys_scan, inc), getattr(blv_scan, inc)))
+                ia.append("FAIL:\t{} != {}".format(getattr(sys_scan, inc),
+                                                    getattr(blv_scan, inc)))
 
         elif(type(inc) == tuple):
             if(getattr(sys_scan, inc[0]) != getdeepattr(blv_scan, inc[1])):
