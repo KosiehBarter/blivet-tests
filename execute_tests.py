@@ -43,8 +43,10 @@ def main_execution(
         loginst.info("Starting virtual machine.")
         virtual_machine.start_machine(machine_name)
         loginst.info("Machine started, tests will be executed on start.")
+
         loginst.info("Waiting for file copyback.")
-        virtual_machine.wait_for_copyback(counter, machine_name, machine_copy_path, loginst, ["TEST_RESULT_{}".format(counter), "blivet_{}_blivet.log".format(counter), "blivet_{}_program.log".format(counter), "stage_{}.log".format(counter)])
+        stage_num = int(test_list[counter - 1].split("_")[2])
+        virtual_machine.wait_for_copyback(counter, machine_name, machine_copy_path, loginst, ["TEST_RESULT_{}".format(stage_num), "blivet_{}_blivet.log".format(stage_num), "blivet_{}_program.log".format(stage_num), "stage_{}.log".format(stage_num)])
 
         loginst.info("Results copied, reverting machine to {}".format(machine_snap_name))
         virtual_machine.revert_machine(machine_name, machine_snap_name, loginst)
@@ -55,13 +57,19 @@ def main_execution(
 CONF_OBJECT = configparser.ConfigParser()
 
 ## Load file from command line.
-if len(sys.argv) < 3:
-    print("USAGE:\tsudo python3 Execute_test.py -i <config_file>")
+if len(sys.argv) < 5:
+    print("USAGE:\tsudo python3 Execute_test.py -i <config_file> -st <num>\n\t"
+            "Enter -st 0 to test all stages, any above for specific stage.")
     sys.exit(0)
 else:
     if sys.argv[1] == "-i":
         try:
             CONFIG_FILE = sys.argv[2]
+            if sys.argv[3] == "-st":
+                try:
+                    TEST_NUM = int(sys.argv[4])
+                except:
+                    print("ERROR: No stage number specified. Enter \"0\" for all stages, any other for specified.")
         except:
             print("ERROR: No config INI file specified")
             sys.exit(1)
@@ -86,6 +94,9 @@ loginst.info("PATHS section complete")
 ## Create (if does not exist) and start the machine.
 loginst.info("Gathering test stages and test dependencies")
 TEST_LIST, DEPS_LIST = virtual_machine.get_files(MACHINE_COPY_PATH, loginst)
+
+if TEST_NUM > 0:
+    TEST_LIST = [TEST_LIST[TEST_NUM - 1]]
 
 ## Check, if folder for machine exists, if not, create it
 if subprocess.call(["ls {} > /dev/null".format(MACHINE_FULL_PATH)], shell=True) != 0:
