@@ -93,7 +93,7 @@ def copy_files(
     files_to_copy, machine_name, machine_copy_path,
     loginst, direction = False, copyback_dir = "test_results"):
 
-    if subprocess.call(["ls {}{}".format(machine_copy_path, copyback_dir)], shell=True) != 0:
+    if subprocess.call(["ls {}{} > /dev/null".format(machine_copy_path, copyback_dir)], shell=True) != 0:
         subprocess.call(["mkdir {}{}".format(machine_copy_path, copyback_dir)], shell=True)
 
     if direction == True:
