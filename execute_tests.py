@@ -15,7 +15,7 @@ def main_execution(
         machine_iso_full_path, machine_copy_path):
     """
         param str machine_name: Machine's name.
-        param list test_list: list of test_stageX* with full path
+        param list test_list: list of test_stage_X* with full path
         param list deps_list: same as test_list, but test deps
         param int machine_ram: amount of memory in MB.
         param int machine_no_of_disks: amount of disks.
