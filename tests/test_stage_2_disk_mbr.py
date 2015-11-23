@@ -29,7 +29,7 @@ def main(disk):
         ia = test_utils.test(test_system_formatted, test_blivet_formatted)
 
         log_stage.info("Writting issues.")
-        test_utils.write_issues(ia, "Formatted disk", 2)
+        test_utils.write_issues(ia, "Formatted disk", stage_num)
 
     except Exception as error_mess:
         log_stage.error(error_mess)

@@ -29,7 +29,7 @@ def main(disk):
         ia = test_utils.test(test_system_partition, test_blivet_partition)
 
         log_stage.info("Writting issues.")
-        test_utils.write_issues(ia, "Partitioned disk", 3)
+        test_utils.write_issues(ia, "Partitioned disk", stage_num)
 
     except Exception as error_mess:
         log_stage.error(error_mess)

@@ -28,7 +28,7 @@ def main(disk):
         ia = test_utils.test(tsep, tbep)
 
         log_stage.info("Writting issues.")
-        test_utils.write_issues(ia, "Extended partition test", 6)
+        test_utils.write_issues(ia, "Extended partition test", stage_num)
 
     except Exception as error_mess:
         log_stage.error(error_mess)

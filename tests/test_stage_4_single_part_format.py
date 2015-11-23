@@ -30,7 +30,7 @@ def main(disk):
         ia = test_utils.test(tspf, tbpf)
 
         log_stage.info("Writting issues.")
-        test_utils.write_issues(ia, "Single partition formatted", 4)
+        test_utils.write_issues(ia, "Single partition formatted", stage_num)
 
     except Exception as error_mess:
         log_stage.error(error_mess)

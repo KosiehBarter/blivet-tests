@@ -51,7 +51,7 @@ def main(disk):
 
             ## Store in file.
             log_stage.info("Comparing objects for partition {}.".format(inc + 1))
-            test_utils.write_issues(list_of_ia[inc], "Multi partition - part {}".format(inc + 1), 5)
+            test_utils.write_issues(list_of_ia[inc], "Multi partition - part {}".format(inc + 1), stage_num)
 
     except Exception as error_mess:
         log_stage.error(error_mess)
