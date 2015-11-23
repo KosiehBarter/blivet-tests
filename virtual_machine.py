@@ -8,7 +8,7 @@ import glob
 import time
 import sys
 
-TEST_LIMIT = 10
+TEST_LIMIT = 5
 
 
 ## Create array of disk arguments
