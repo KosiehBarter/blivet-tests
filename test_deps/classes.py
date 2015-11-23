@@ -11,7 +11,7 @@
 """
 
 import test_utils
-import blivet
+import blivet_utils
 
 
 class BlivetInitialization(object):
@@ -24,7 +24,7 @@ class BlivetInitialization(object):
             :param int child_index: If child is TRUE, then this is index of a child object
         """
         super(BlivetInitialization, self).__init__()
-        self.object = blivet.Blivet()
+        self.object = blivet_utils.init_blivet_basic()
         self.object.reset()
         self.disk = self.object.devicetree.getDeviceByName(disk)
         if child_index != None:
