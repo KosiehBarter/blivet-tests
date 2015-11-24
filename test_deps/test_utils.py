@@ -4,20 +4,16 @@
 ### This program is under GPL licence.
 
 
-"""<vtrefny> log_handler = logging.FileHandler(log_file)
-<vtrefny>     log_handler.setLevel(logging_level)
-<vtrefny>     formatter = logging.Formatter('%(levelname)s:%(name)s: %(message)s')
-<vtrefny>     log_handler.setFormatter(formatter)
-<vtrefny>     logger = logging.getLogger(component)
-<vtrefny>     logger.addHandler(log_handler)
-<vtrefny>     logger.setLevel(logging_level)"""
-
-
-
 import sys
 import subprocess
 from random import randint
 import logging
+
+
+## Init traceback
+def return_trace(log_mes):
+    return traceback_exc(log_mes)
+
 
 ## Init logging to monitor tests
 def init_logging(log_name, log_level, stage_num = None, connection = None):
@@ -69,16 +65,21 @@ def write_issues(ia, action, stage):
 
 
 #### Main test
-def test(sys_scan, blv_scan):
+def test(sys_scan, blv_scan, stage_num):
     ia = []
+
+    log_stage_test = init_logging("stage", 0, stage_num)
 
     for inc in sys_scan.get_attributes():
         if  (type(inc) == str):
+
+            log_stage_test.debug("Comparing:\t{} - \t - {}".format(getattr(sys_scan, inc), getattr(blv_scan, inc)))
             if(getattr(sys_scan, inc) != getattr(blv_scan, inc)):
                 ia.append("FAIL:\t{} != {}".format(getattr(sys_scan, inc),
                                                     getattr(blv_scan, inc)))
 
         elif(type(inc) == tuple):
+            log_stage_test.debug("Comparing:\t{} - \t - {}".format(getattr(sys_scan, inc[0]), getdeepattr(blv_scan, inc[1])))
             if(getattr(sys_scan, inc[0]) != getdeepattr(blv_scan, inc[1])):
                 ia.append("FAIL: {}:\t\t{} != {}".format(inc[0], getattr(sys_scan, inc[0]), getdeepattr(blv_scan, inc[1])))
     return ia
