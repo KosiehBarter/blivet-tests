@@ -1,4 +1,4 @@
-### Test - stage 1
+### Test - stage 4
 ### Part of: Blivet test collection
 ### Author: kvalek@redhat.com
 ### This program is under GPL licence.
@@ -15,19 +15,25 @@ def main(disk):
 
     log_stage.info("Starting test: {}".format(__file__))
     try:
+        log_stage.info("Preparing disk:\t{}".format(disk))
+        test_utils.create_new_alloc_table(disk)
+        test_utils.create_new_partition(disk, "primary", 1, -1)
+        test_utils.format_new_partition("{}{}".format(disk, 1), "ext4")
+
         log_stage.info("Fetching system scan of disk:\t{}".format(disk))
-        test_system = classes.SystemDisk_Scan(disk)
+        tspf = classes.SystemPartitionFormatted_Scan(disk, 1)
 
         log_stage.info("Fetching blivet scan of disk:\t{}".format(disk))
-        test_blivet = classes.BlivetInitialization(disk).disk
+        tbpf = classes.BlivetInitialization(disk, 1).child
 
         log_stage.info("Comparing objects.")
-        ia = test_utils.test(test_system, test_blivet)
+        ia = test_utils.test(tspf, tbpf, stage_num)
 
         log_stage.info("Writting issues.")
-        test_utils.write_issues(ia, "Basic disk", stage_num)
+        test_utils.write_issues(ia, "Single partition formatted", stage_num)
+
     except Exception as error_mess:
-        log_stage.error(error_mess)
+        log_stage.exception(error_mess)
 
 if __name__ == '__main__':
     main('vdb')

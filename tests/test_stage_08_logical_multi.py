@@ -37,22 +37,22 @@ def main(disk):
                 finish = start + 512
 
             ## init objects
-            log_stage.info("Fetching system scan of disk:\t{}".format("{}{}".format(disk, inc + 1)))
+            log_stage.info("Fetching system scan of disk:\t{}".format("{}{}".format(disk, inc + 1 + 4)))
             list_of_tests.append(classes.SystemLogical_Scan(disk, inc + 1, 1))
 
-            log_stage.info("Fetching blivet scan of disk:\t{}".format("{}{}".format(disk, inc + 1)))
+            log_stage.info("Fetching blivet scan of disk:\t{}".format("{}{}".format(disk, inc + 1 + 4)))
             list_of_blivet.append(classes.BlivetInitialization(disk, inc + 1).child)
 
             ## Store in arrays
             log_stage.info("Saving results to issue array for disk:\t{}".format("{}{}".format(disk, inc + 1)))
-            list_of_ia.append(test_utils.test(list_of_tests[inc], list_of_blivet[inc]))
+            list_of_ia.append(test_utils.test(list_of_tests[inc], list_of_blivet[inc], stage_num))
 
             ## Store in file.
             log_stage.info("Comparing objects for partition {}.".format(inc + 1))
             test_utils.write_issues(list_of_ia[inc], "Multi partition - part {}".format(inc + 1), stage_num)
 
     except Exception as error_mess:
-        log_stage.error(error_mess)
+        log_stage.exception(error_mess)
 
 if __name__ == '__main__':
     main('vdb')
