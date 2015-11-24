@@ -77,11 +77,12 @@ def revert_machine(machine_name, machine_snap_name, loginst):
             "reverted to snapshot \"{}\".".format(machine_name, machine_snap_name))
 
 
-def get_files(machine_copy_path, loginst):
+def get_files(machine_copy_path, loginst, start_only):
     test_list = sorted(glob.glob("{}tests/*.py".format(machine_copy_path)))
     deps_list = sorted(glob.glob("{}test_deps/*.py".format(machine_copy_path)))
     ## Special append for run_test.sh
-    deps_list.append("{}test_deps/run_test.sh".format(machine_copy_path))
+    if start_only == False:
+        deps_list.append("{}test_deps/run_test.sh".format(machine_copy_path))
     if test_list == [] and deps_list == []:
         loginst.error("No files in {}: - tests/ OR test_deps/".format(machine_copy_path))
     else:
