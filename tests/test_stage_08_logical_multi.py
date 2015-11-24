@@ -45,7 +45,7 @@ def main(disk):
 
             ## Store in arrays
             log_stage.info("Saving results to issue array for disk:\t{}".format("{}{}".format(disk, inc + 1)))
-            list_of_ia.append(test_utils.test(list_of_tests[inc], list_of_blivet[inc], stage_num))
+            list_of_ia.append(test_utils.test(list_of_tests[inc], list_of_blivet[inc]))
 
             ## Store in file.
             log_stage.info("Comparing objects for partition {}.".format(inc + 1))

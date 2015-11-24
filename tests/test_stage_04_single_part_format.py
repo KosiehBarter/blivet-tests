@@ -27,7 +27,7 @@ def main(disk):
         tbpf = classes.BlivetInitialization(disk, 1).child
 
         log_stage.info("Comparing objects.")
-        ia = test_utils.test(tspf, tbpf, stage_num)
+        ia = test_utils.test(tspf, tbpf)
 
         log_stage.info("Writting issues.")
         test_utils.write_issues(ia, "Single partition formatted", stage_num)

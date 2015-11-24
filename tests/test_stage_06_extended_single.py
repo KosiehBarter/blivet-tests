@@ -25,7 +25,7 @@ def main(disk):
         tbep = classes.BlivetInitialization(disk, 1).child
 
         log_stage.info("Comparing objects.")
-        ia = test_utils.test(tsep, tbep, stage_num)
+        ia = test_utils.test(tsep, tbep)
 
         log_stage.info("Writting issues.")
         test_utils.write_issues(ia, "Extended partition test", stage_num)

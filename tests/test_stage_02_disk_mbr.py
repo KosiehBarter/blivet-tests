@@ -26,7 +26,7 @@ def main(disk):
         test_blivet_formatted = classes.BlivetInitialization(disk).disk
 
         log_stage.info("Comparing objects.")
-        ia = test_utils.test(test_system_formatted, test_blivet_formatted, stage_num)
+        ia = test_utils.test(test_system_formatted, test_blivet_formatted)
 
         log_stage.info("Writting issues.")
         test_utils.write_issues(ia, "Formatted disk", stage_num)
