@@ -12,7 +12,7 @@ from test_deps import test_utils
 def main_execution(
         machine_name, test_list, deps_list, machine_ram, machine_no_of_disks,
         machine_snap_name, machine_full_path, machine_ks_full_path,
-        machine_iso_full_path, machine_copy_path):
+        machine_iso_full_path, machine_copy_path, start_only):
     """
         param str machine_name: Machine's name.
         param list test_list: list of test_stage_X* with full path
@@ -42,15 +42,18 @@ def main_execution(
         virtual_machine.copy_files(deps_list, machine_name, machine_copy_path, loginst, True)
         loginst.info("Starting virtual machine.")
         virtual_machine.start_machine(machine_name)
-        loginst.info("Machine started, tests will be executed on start.")
+        if start_only == False:
+            loginst.info("Machine started, tests will be executed on start.")
 
-        loginst.info("Waiting for file copyback.")
-        stage_num = int(test_list[counter - 1].split("_")[2])
-        virtual_machine.wait_for_copyback(counter, machine_name, machine_copy_path, loginst, ["TEST_RESULT_{}".format(stage_num), "blivet_{}_blivet.log".format(stage_num), "blivet_{}_program.log".format(stage_num), "stage_{}.log".format(stage_num)])
+            loginst.info("Waiting for file copyback.")
+            stage_num = int(test_list[counter - 1].split("_")[2])
+            virtual_machine.wait_for_copyback(counter, machine_name, machine_copy_path, loginst, ["TEST_RESULT_{}".format(stage_num), "blivet_{}_blivet.log".format(stage_num), "blivet_{}_program.log".format(stage_num), "stage_{}.log".format(stage_num)])
 
-        loginst.info("Results copied, reverting machine to {}".format(machine_snap_name))
-        virtual_machine.revert_machine(machine_name, machine_snap_name, loginst)
-        counter = counter + 1
+            loginst.info("Results copied, reverting machine to {}".format(machine_snap_name))
+            virtual_machine.revert_machine(machine_name, machine_snap_name, loginst)
+            counter = counter + 1
+        else:
+            loginst.info("Machine started in interactive mode. Enter it with VNC.")
 
 
 ## Parse INI
@@ -66,6 +69,11 @@ else:
         try:
             CONFIG_FILE = sys.argv[2]
             if sys.argv[3] == "-st":
+                try:
+                    TEST_NUM = int(sys.argv[4])
+                except:
+                    print("ERROR: No stage number specified. Enter \"0\" for all stages, any other for specified.")
+            elif sys.argv[3] == "-startonly":
                 try:
                     TEST_NUM = int(sys.argv[4])
                 except:
@@ -89,11 +97,18 @@ MACHINE_FULL_PATH = CONF_OBJECT['PATHS']['MachineInstallPath']
 MACHINE_KS_FULL_PATH = CONF_OBJECT['PATHS']['MachinePathToKickstart']
 MACHINE_ISO_FULL_PATH = CONF_OBJECT['PATHS']['MachinePathToIso']
 MACHINE_COPY_PATH = CONF_OBJECT['PATHS']['MachineCopySource']
+
+## Special - start only
+if sys.argv[3] == "-startonly":
+    MACHINE_START_ONLY = True
+    loginst.debug("RUNNING MACHINE IN INTERACTIVE MODE")
+else:
+    MACHINE_START_ONLY = False
 loginst.info("PATHS section complete")
 
 ## Create (if does not exist) and start the machine.
 loginst.info("Gathering test stages and test dependencies")
-TEST_LIST, DEPS_LIST = virtual_machine.get_files(MACHINE_COPY_PATH, loginst)
+TEST_LIST, DEPS_LIST = virtual_machine.get_files(MACHINE_COPY_PATH, loginst, MACHINE_START_ONLY)
 
 if TEST_NUM > 0:
     TEST_LIST = [TEST_LIST[TEST_NUM - 1]]
@@ -108,7 +123,7 @@ if MACHINE_KS_FULL_PATH != "":
     main_execution(
         MACHINE_NAME, TEST_LIST, DEPS_LIST, MACHINE_RAM, MACHINE_NO_OF_DISKS,
         MACHINE_SNAP_NAME, MACHINE_FULL_PATH, MACHINE_KS_FULL_PATH,
-        MACHINE_ISO_FULL_PATH, MACHINE_COPY_PATH)
+        MACHINE_ISO_FULL_PATH, MACHINE_COPY_PATH, MACHINE_START_ONLY)
 else:
     loginst.error("Missing parameter - kickstart URL")
     print("Please make your own kickstart file, upload it to "
