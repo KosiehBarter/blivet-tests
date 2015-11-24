@@ -75,7 +75,14 @@ else:
                     print("ERROR: No stage number specified. Enter \"0\" for all stages, any other for specified.")
             elif sys.argv[3] == "-startonly":
                 try:
-                    TEST_NUM = int(sys.argv[4])
+                    if int(sys.argv[4]) != 0:
+                        try:
+                            TEST_NUM = int(sys.argv[4])
+                        except:
+                            sys.exit(1)
+                    else:
+                        print("ERROR: Stage number MUST NOT be zero.")
+
                 except:
                     print("ERROR: No stage number specified. Enter \"0\" for all stages, any other for specified.")
         except:
