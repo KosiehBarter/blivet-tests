@@ -65,23 +65,21 @@ def write_issues(ia, action, stage):
 
 
 #### Main test
-def test(sys_scan, blv_scan, stage_num):
+def test(sys_scan, blv_scan):
     ia = []
-
-    log_stage_test = init_logging("stage", 0, stage_num)
 
     for inc in sys_scan.get_attributes():
         if  (type(inc) == str):
-
-            log_stage_test.debug("Comparing:\t{} - \t - {}".format(getattr(sys_scan, inc), getattr(blv_scan, inc)))
-            if(getattr(sys_scan, inc) != getattr(blv_scan, inc)):
-                ia.append("FAIL:\t{} != {}".format(getattr(sys_scan, inc),
-                                                    getattr(blv_scan, inc)))
+            val_sys = getattr(sys_scan, inc)
+            val_blv = getattr(blv_scan, inc)
 
         elif(type(inc) == tuple):
-            log_stage_test.debug("Comparing:\t{} - \t - {}".format(getattr(sys_scan, inc[0]), getdeepattr(blv_scan, inc[1])))
-            if(getattr(sys_scan, inc[0]) != getdeepattr(blv_scan, inc[1])):
-                ia.append("FAIL: {}:\t\t{} != {}".format(inc[0], getattr(sys_scan, inc[0]), getdeepattr(blv_scan, inc[1])))
+            val_sys = getattr(sys_scan, inc[0])
+            val_blv = getdeepattr(blv_scan, inc[1])
+
+        if val_sys != val_blv:
+            ia.append("FAIL:\t{} != {}".format(val_sys, val_blv))
+
     return ia
 
 
