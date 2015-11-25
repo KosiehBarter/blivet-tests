@@ -27,6 +27,7 @@ def main(disk):
         list_of_ia = []
 
         test_utils.create_new_partition(disk, "extended", start, -1)
+        log_p_num_override = 4
         for inc in range(4):
             log_stage.debug("Creating new partition for disk {}, partition {}".format(disk, inc + 1))
             if inc == 3:
@@ -36,15 +37,14 @@ def main(disk):
                 start = finish + 1
                 finish = start + 512
 
-            ## init objects
-            log_stage.info("Fetching system scan of disk:\t{}".format("{}{}".format(disk, inc + 1 + 4)))
-            list_of_tests.append(classes.SystemLogical_Scan(disk, inc + 1, 1))
+            log_stage.info("Fetching system scan of logical partition:\t{}".format("{}{}".format(disk, inc + 1 + log_p_num_override)))
+            list_of_tests.append(classes.SystemLogical_Scan(disk, 1, inc + 1 + log_p_num_override))
 
-            log_stage.info("Fetching blivet scan of disk:\t{}".format("{}{}".format(disk, inc + 1 + 4)))
-            list_of_blivet.append(classes.BlivetInitialization(disk, inc + 1).child)
+            log_stage.info("Fetching blivet scan of logical partition:\t{}".format("{}{}".format(disk, inc + 1 + log_p_num_override)))
+            list_of_blivet.append(classes.BlivetInitialization(disk, inc + 2).child)
 
             ## Store in arrays
-            log_stage.info("Saving results to issue array for disk:\t{}".format("{}{}".format(disk, inc + 1)))
+            log_stage.info("Saving results to issue array for disk:\t{}".format("{}{}".format(disk, inc + 1 + log_p_num_override)))
             list_of_ia.append(test_utils.test(list_of_tests[inc], list_of_blivet[inc]))
 
             ## Store in file.
