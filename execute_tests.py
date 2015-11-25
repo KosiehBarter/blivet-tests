@@ -12,7 +12,7 @@ from test_deps import test_utils
 def main_execution(
         machine_name, test_list, deps_list, machine_ram, machine_no_of_disks,
         machine_snap_name, machine_full_path, machine_ks_full_path,
-        machine_iso_full_path, machine_copy_path, start_only):
+        machine_iso_full_path, machine_copy_path, start_only = False, machine_update = False):
     """
         param str machine_name: Machine's name.
         param list test_list: list of test_stage_X* with full path
@@ -36,13 +36,26 @@ def main_execution(
             virtual_machine.create_machine(
                 machine_name, machine_full_path, disk_arg, machine_iso_full_path,
                 machine_ram, machine_ks_full_path, machine_snap_name, loginst)
+            virtual_machine.create_snapshot(machine_name, machine_snap_name, loginst)
+
+        ## Special condition for -startonly switch
+        if start_only == True:
+            loginst.debug("MACHINE IN INTERACTIVE / MANUAL MODE - REVERTING TO SNAPSHOT BEFORE START")
+            virtual_machine.revert_machine(machine_name, machine_snap_name, loginst)
+
+        ## Special condition for machine update
+        if machine_update == True:
+            loginst.info("Test suite ran with -update switch - BEGINING UPDATE PROCEDURE. REVERTING to {}".format(machine_snap_name))
+            virtual_machine.revert_machine(machine_name, machine_snap_name, loginst)
+            virtual_machine.remove_snapshot(machine_name, machine_snap_name, loginst)
 
         loginst.info("Beginning to copy files using virt-copy-in.")
         virtual_machine.copy_files(test_list[counter - 1], machine_name, machine_copy_path, loginst, True)
         virtual_machine.copy_files(deps_list, machine_name, machine_copy_path, loginst, True)
         loginst.info("Starting virtual machine.")
         virtual_machine.start_machine(machine_name)
-        if start_only == False:
+
+        if start_only == False and machine_update == False:
             loginst.info("Machine started, tests will be executed on start.")
 
             loginst.info("Waiting for file copyback.")
@@ -52,42 +65,55 @@ def main_execution(
             loginst.info("Results copied, reverting machine to {}".format(machine_snap_name))
             virtual_machine.revert_machine(machine_name, machine_snap_name, loginst)
             counter = counter + 1
+
+        elif machine_update == True:
+            loginst.info("Machine started, begining update procedure. Machine will be shut down automatically")
+            virtual_machine.wait_for_shutdown(machine_name)
+            virtual_machine.create_snapshot(machine_name, machine_snap_name, loginst)
+
         else:
             loginst.info("Machine started in interactive mode. Enter it with VNC.")
 
 
 ## Parse INI
 CONF_OBJECT = configparser.ConfigParser()
+MACHINE_UPDATE = False
+MACHINE_START_ONLY = False
+TEST_NUM = 0
 
 ## Load file from command line.
-if len(sys.argv) < 5:
+arg_array = sys.argv
+if len(arg_array) != 1:
+    if arg_array[1] == "-i":
+        try:
+            CONFIG_FILE = arg_array[2]
+        except:
+            print("ERROR:\tNo config file specified.")
+            sys.exit(1)
+    try:
+        if arg_array[3] == "-st":
+            try:
+                TEST_NUM = int(arg_array[4])
+            except:
+                print("ERROR:\tNo stage number specified, enter 0 for all tests or number for specific test.")
+                sys.exit(1)
+        if arg_array[3] == "-startonly":
+            MACHINE_START_ONLY = True
+            try:
+                TEST_NUM = arg_array[4]
+                if TEST_NUM == 0:
+                    print("ERROR:\tCannot run all tests in interactive mode. Enter specific stage number.")
+                    sys.exit(1)
+            except:
+                print("ERROR:\tNo stage number specified. ")
+        if arg_array[3] == "-update":
+            MACHINE_UPDATE = True
+    except:
+        print("No additional parameters set, will run all tests.")
+else:
     print("USAGE:\tsudo python3 Execute_test.py -i <config_file> -st <num>\n\t"
             "Enter -st 0 to test all stages, any above for specific stage.")
-    sys.exit(0)
-else:
-    if sys.argv[1] == "-i":
-        try:
-            CONFIG_FILE = sys.argv[2]
-            if sys.argv[3] == "-st":
-                try:
-                    TEST_NUM = int(sys.argv[4])
-                except:
-                    print("ERROR: No stage number specified. Enter \"0\" for all stages, any other for specified.")
-            elif sys.argv[3] == "-startonly":
-                try:
-                    if int(sys.argv[4]) != 0:
-                        try:
-                            TEST_NUM = int(sys.argv[4])
-                        except:
-                            sys.exit(1)
-                    else:
-                        print("ERROR: Stage number MUST NOT be zero.")
 
-                except:
-                    print("ERROR: No stage number specified. Enter \"0\" for all stages, any other for specified.")
-        except:
-            print("ERROR: No config INI file specified")
-            sys.exit(1)
 
 loginst = test_utils.init_logging(CONFIG_FILE.split(".")[0], 0)
 
@@ -106,16 +132,13 @@ MACHINE_ISO_FULL_PATH = CONF_OBJECT['PATHS']['MachinePathToIso']
 MACHINE_COPY_PATH = CONF_OBJECT['PATHS']['MachineCopySource']
 
 ## Special - start only
-if sys.argv[3] == "-startonly":
-    MACHINE_START_ONLY = True
+if MACHINE_START_ONLY == True:
     loginst.debug("RUNNING MACHINE IN INTERACTIVE MODE")
-else:
-    MACHINE_START_ONLY = False
 loginst.info("PATHS section complete")
 
 ## Create (if does not exist) and start the machine.
 loginst.info("Gathering test stages and test dependencies")
-TEST_LIST, DEPS_LIST = virtual_machine.get_files(MACHINE_COPY_PATH, loginst, MACHINE_START_ONLY)
+TEST_LIST, DEPS_LIST = virtual_machine.get_files(MACHINE_COPY_PATH, loginst, MACHINE_START_ONLY, MACHINE_UPDATE)
 
 if TEST_NUM > 0:
     TEST_LIST = [TEST_LIST[TEST_NUM - 1]]
@@ -130,7 +153,7 @@ if MACHINE_KS_FULL_PATH != "":
     main_execution(
         MACHINE_NAME, TEST_LIST, DEPS_LIST, MACHINE_RAM, MACHINE_NO_OF_DISKS,
         MACHINE_SNAP_NAME, MACHINE_FULL_PATH, MACHINE_KS_FULL_PATH,
-        MACHINE_ISO_FULL_PATH, MACHINE_COPY_PATH, MACHINE_START_ONLY)
+        MACHINE_ISO_FULL_PATH, MACHINE_COPY_PATH, MACHINE_START_ONLY, MACHINE_UPDATE)
 else:
     loginst.error("Missing parameter - kickstart URL")
     print("Please make your own kickstart file, upload it to "
