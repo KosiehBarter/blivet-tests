@@ -105,16 +105,16 @@ def wait_for_shutdown(machine_name):
 
 
 ## Get files to copy to the machine
-def get_files(machine_copy_path, loginst, start_only, machine_update = False):
+def get_files(machine_copy_path, loginst, action = None):
     test_list = sorted(glob.glob("{}tests/*.py".format(machine_copy_path)))
     deps_list = sorted(glob.glob("{}test_deps/*.py".format(machine_copy_path)))
 
     ## Special append for run_test.sh
-    if start_only == False:
+    if action == None:
         deps_list.append("{}test_deps/run_test.sh".format(machine_copy_path))
 
     ## Special append for run_update.sh
-    if machine_update == True:
+    if action == "update":
         deps_list = ["{}test_deps/run_test.sh".format(machine_copy_path)]
         deps_list.append("{}test_deps/run_update.sh".format(machine_copy_path))
 

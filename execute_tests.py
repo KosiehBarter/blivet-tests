@@ -12,7 +12,7 @@ from test_deps import test_utils
 def main_execution(
         machine_name, test_list, deps_list, machine_ram, machine_no_of_disks,
         machine_snap_name, machine_full_path, machine_ks_full_path,
-        machine_iso_full_path, machine_copy_path, start_only = False, machine_update = False):
+        machine_iso_full_path, machine_copy_path, action = None):
     """
         param str machine_name: Machine's name.
         param list test_list: list of test_stage_X* with full path
@@ -25,29 +25,47 @@ def main_execution(
         param str machine_iso_full_path: Full path to installation ISO.
         param str machine_copy_path: Full path to folder where tests and deps reside
     """
+
+    ## Special condition for updating.
+    if action == "update":
+        loginst.info("Test suite ran with -update switch - BEGINING UPDATE PROCEDURE. REVERTING to {}".format(machine_snap_name))
+        virtual_machine.revert_machine(machine_name, machine_snap_name, loginst)
+        virtual_machine.remove_snapshot(machine_name, machine_snap_name, loginst)
+        virtual_machine.start_machine(machine_name)
+        loginst.info("Machine started, begining update procedure. Machine will be shut down automatically")
+        virtual_machine.wait_for_shutdown(machine_name)
+        virtual_machine.create_snapshot(machine_name, machine_snap_name, loginst)
+        sys.exit(0)
+
+
+    ## Special condition for "just" installing.
+    if action == "install":
+        if subprocess.call(["virsh list --all | grep {}".format(machine_name)], shell=True) == 0:
+            loginst.error("Machine {} already exists... Cannot install.".format(machine_name))
+            sys.exit(1)
+        else:
+            loginst.info("Creating virtual machine - creating disk array")
+            disk_arg = virtual_machine.create_disks(machine_no_of_disks, machine_full_path, machine_name, loginst)
+            loginst.info("Creating virtual machine - starting installation")
+            virtual_machine.create_machine(machine_name, machine_full_path, disk_arg, machine_iso_full_path,machine_ram, machine_ks_full_path, machine_snap_name, loginst)
+            loginst.info("Creating snapshot {} for {}".format(machine_snap_name, machine_name))
+            virtual_machine.create_snapshot(machine_name, machine_snap_name, loginst)
+            sys.exit(0)
+
+
+    ## Normal tests will begin here.
     counter = 1
     for inc in test_list:
 
         if subprocess.call(["virsh list --all | grep {}".format(machine_name)], shell=True) != 0:
-            loginst.info("Creating virtual machine - creating disk array")
-            disk_arg = virtual_machine.create_disks(
-                machine_no_of_disks, machine_full_path, machine_name, loginst)
-            loginst.info("Creating virtual machine - starting installation")
-            virtual_machine.create_machine(
-                machine_name, machine_full_path, disk_arg, machine_iso_full_path,
-                machine_ram, machine_ks_full_path, machine_snap_name, loginst)
-            virtual_machine.create_snapshot(machine_name, machine_snap_name, loginst)
+            loginst.error("Machine {} not installed".format(machine_name))
+            print("Machine {} is not installed - run with -install switch first to install.".format(machine_name))
+            sys.exit(1)
 
         ## Special condition for -startonly switch
-        if start_only == True:
+        if action == "startonly":
             loginst.debug("MACHINE IN INTERACTIVE / MANUAL MODE - REVERTING TO SNAPSHOT BEFORE START")
             virtual_machine.revert_machine(machine_name, machine_snap_name, loginst)
-
-        ## Special condition for machine update
-        if machine_update == True:
-            loginst.info("Test suite ran with -update switch - BEGINING UPDATE PROCEDURE. REVERTING to {}".format(machine_snap_name))
-            virtual_machine.revert_machine(machine_name, machine_snap_name, loginst)
-            virtual_machine.remove_snapshot(machine_name, machine_snap_name, loginst)
 
         loginst.info("Beginning to copy files using virt-copy-in.")
         virtual_machine.copy_files(test_list[counter - 1], machine_name, machine_copy_path, loginst, True)
@@ -55,7 +73,8 @@ def main_execution(
         loginst.info("Starting virtual machine.")
         virtual_machine.start_machine(machine_name)
 
-        if start_only == False and machine_update == False:
+        ## Normal procedural testing
+        if action == None:
             loginst.info("Machine started, tests will be executed on start.")
 
             loginst.info("Waiting for file copyback.")
@@ -66,19 +85,14 @@ def main_execution(
             virtual_machine.revert_machine(machine_name, machine_snap_name, loginst)
             counter = counter + 1
 
-        elif machine_update == True:
-            loginst.info("Machine started, begining update procedure. Machine will be shut down automatically")
-            virtual_machine.wait_for_shutdown(machine_name)
-            virtual_machine.create_snapshot(machine_name, machine_snap_name, loginst)
-
+        ## -startonly switch
         else:
             loginst.info("Machine started in interactive mode. Enter it with VNC.")
 
 
 ## Parse INI
 CONF_OBJECT = configparser.ConfigParser()
-MACHINE_UPDATE = False
-MACHINE_START_ONLY = False
+ACTION = None
 TEST_NUM = 0
 
 ## Load file from command line.
@@ -97,8 +111,8 @@ if len(arg_array) != 1:
             except:
                 print("ERROR:\tNo stage number specified, enter 0 for all tests or number for specific test.")
                 sys.exit(1)
-        if arg_array[3] == "-startonly":
-            MACHINE_START_ONLY = True
+        elif arg_array[3] == "-startonly":
+            ACTION = "startonly"
             try:
                 TEST_NUM = arg_array[4]
                 if TEST_NUM == 0:
@@ -106,8 +120,12 @@ if len(arg_array) != 1:
                     sys.exit(1)
             except:
                 print("ERROR:\tNo stage number specified. ")
-        if arg_array[3] == "-update":
-            MACHINE_UPDATE = True
+
+        elif arg_array[3] == "-update":
+            ACTION = "update"
+
+        elif arg_array[3] == "-install":
+            ACTION = "install"
     except:
         print("No additional parameters set, will run all tests.")
 else:
@@ -132,13 +150,13 @@ MACHINE_ISO_FULL_PATH = CONF_OBJECT['PATHS']['MachinePathToIso']
 MACHINE_COPY_PATH = CONF_OBJECT['PATHS']['MachineCopySource']
 
 ## Special - start only
-if MACHINE_START_ONLY == True:
+if ACTION == "startonly":
     loginst.debug("RUNNING MACHINE IN INTERACTIVE MODE")
 loginst.info("PATHS section complete")
 
 ## Create (if does not exist) and start the machine.
 loginst.info("Gathering test stages and test dependencies")
-TEST_LIST, DEPS_LIST = virtual_machine.get_files(MACHINE_COPY_PATH, loginst, MACHINE_START_ONLY, MACHINE_UPDATE)
+TEST_LIST, DEPS_LIST = virtual_machine.get_files(MACHINE_COPY_PATH, loginst, ACTION)
 
 if TEST_NUM > 0:
     TEST_LIST = [TEST_LIST[TEST_NUM - 1]]
@@ -153,7 +171,7 @@ if MACHINE_KS_FULL_PATH != "":
     main_execution(
         MACHINE_NAME, TEST_LIST, DEPS_LIST, MACHINE_RAM, MACHINE_NO_OF_DISKS,
         MACHINE_SNAP_NAME, MACHINE_FULL_PATH, MACHINE_KS_FULL_PATH,
-        MACHINE_ISO_FULL_PATH, MACHINE_COPY_PATH, MACHINE_START_ONLY, MACHINE_UPDATE)
+        MACHINE_ISO_FULL_PATH, MACHINE_COPY_PATH, ACTION)
 else:
     loginst.error("Missing parameter - kickstart URL")
     print("Please make your own kickstart file, upload it to "
