@@ -54,9 +54,6 @@ def create_machine(
         time.sleep(1)
 
     subprocess.call([
-        "virsh snapshot-create-as {} {}".format(
-            machine_name, machine_snap_name)], shell=True)
-    subprocess.call([
         "virsh shutdown {}".format(machine_name)], shell=True)
 
 
@@ -77,12 +74,50 @@ def revert_machine(machine_name, machine_snap_name, loginst):
             "reverted to snapshot \"{}\".".format(machine_name, machine_snap_name))
 
 
-def get_files(machine_copy_path, loginst, start_only):
+## Create snapshot. After update or install.
+def create_snapshot(machine_name, machine_snap_name, loginst):
+    out = subprocess.call(["virsh snapshot-create-as {} {}".format(machine_name, machine_snap_name)], shell=True)
+    if out == 0:
+        loginst.info("Snapshot {} for machine {} created successfully".format(machine_snap_name, machine_name))
+    else:
+        loginst.error("Snapshot {} ({}) FAILED to create".format(machine_snap_name, machine_name))
+
+
+## Remove snapshot. UPDATE ONLY!
+def remove_snapshot(machine_name, machine_snap_name, loginst):
+    loginst.debug("Removing snapshot {} for machine {}.".format(machine_snap_name, machine_name))
+    out = subprocess.call(["virsh snapshot-delete {} {}".format(machine_name, machine_snap_name)], shell = True)
+    if out != 0:
+        loginst.error("Snapshot {} ({}) FAILED to delete".format(machine_snap_name, machine_name))
+    else:
+        loginst.info("Snapshot {} ({}) successfully deleted.".format(machine_snap_name, machine_name))
+
+
+## Wait for shutdown procedure
+def wait_for_shutdown(machine_name):
+    inc = 1
+    while inc != 0:
+        out = subprocess.call(["LANG=c virsh list --all | grep {} | grep \"shut off\" > /dev/null".format(machine_name)], shell = True)
+        if out == 0:
+            inc = 0
+        else:
+            time.sleep(1)
+
+
+## Get files to copy to the machine
+def get_files(machine_copy_path, loginst, start_only, machine_update = False):
     test_list = sorted(glob.glob("{}tests/*.py".format(machine_copy_path)))
     deps_list = sorted(glob.glob("{}test_deps/*.py".format(machine_copy_path)))
+
     ## Special append for run_test.sh
     if start_only == False:
         deps_list.append("{}test_deps/run_test.sh".format(machine_copy_path))
+
+    ## Special append for run_update.sh
+    if machine_update == True:
+        deps_list = ["{}test_deps/run_test.sh".format(machine_copy_path)]
+        deps_list.append("{}test_deps/run_update.sh".format(machine_copy_path))
+
     if test_list == [] and deps_list == []:
         loginst.error("No files in {}: - tests/ OR test_deps/".format(machine_copy_path))
     else:
@@ -90,6 +125,7 @@ def get_files(machine_copy_path, loginst, start_only):
         return (test_list, deps_list)
 
 
+## Copy procedure
 def copy_files(
     files_to_copy, machine_name, machine_copy_path,
     loginst, direction = False, copyback_dir = "test_results"):
@@ -119,6 +155,7 @@ def copy_files(
     return out
 
 
+## Wait for files on machine to be copied back
 def wait_for_copyback(counter, machine_name, machine_copy_path, loginst, copyback_files):
     enc = 1
     wait_time = 0
