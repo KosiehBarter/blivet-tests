@@ -57,6 +57,9 @@ def main_execution(
     counter = 1
     for inc in test_list:
 
+        loginst.info("Pre-start revertion for any posible leftovers from -startonly switch.")
+        virtual_machine.revert_machine(machine_name, machine_snap_name, loginst)
+
         if subprocess.call(["virsh list --all | grep {}".format(machine_name)], shell=True) != 0:
             loginst.error("Machine {} not installed".format(machine_name))
             print("Machine {} is not installed - run with -install switch first to install.".format(machine_name))
@@ -94,6 +97,7 @@ def main_execution(
 CONF_OBJECT = configparser.ConfigParser()
 ACTION = None
 TEST_NUM = 0
+CONFIG_FILE = None
 
 ## Load file from command line.
 arg_array = sys.argv
@@ -114,7 +118,7 @@ if len(arg_array) != 1:
         elif arg_array[3] == "-startonly":
             ACTION = "startonly"
             try:
-                TEST_NUM = arg_array[4]
+                TEST_NUM = int(arg_array[4])
                 if TEST_NUM == 0:
                     print("ERROR:\tCannot run all tests in interactive mode. Enter specific stage number.")
                     sys.exit(1)
