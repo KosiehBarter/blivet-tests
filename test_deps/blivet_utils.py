@@ -11,7 +11,7 @@ def init_blivet_basic():
     return bo
 
 def init_disk(bo, disk):
-    return bl_obj.devicetree.getDeviceByName(disk)
+    return bo.devicetree.getDeviceByName(disk)
 
 
 ## Create a msdos label
@@ -22,11 +22,24 @@ def create_disk_label(bo, disk_object, label_type):
     bo.formatDevice(disk_object, new_format)
     bo.doIt()
 
-def create_partition(log_stage, bo, disk_obj):
-    log_stage.debug("Calling: blivet.partitioning.get_free_regions on {}, align=True".format(disk_obj.name))
-    part_size = blivet.partitioning.getFreeRegions([disk_obj], align=True)
-    log_stage.debug("part_size = {}".format(part_size))
 
-    new_part = bo.newPartition(size=part_size[0].getSize(), parents=[disk_obj])
+## Create a partition
+def create_partition(log_stage, bo, disk_obj, size = None, disk_format = None, type_of_part = None):
+
+    if size == None:
+        part_size = int(bo.getFreeSpace([disk_obj]).get(disk_obj.name)[0]) - 1
+        log_stage.debug("part_size = {}".format(part_size))
+    else:
+        part_size = size
+
+    if disk_format == None:
+        new_part = bo.newPartition(size=part_size, parents=[disk_obj], partType = type_of_part)
+    else:
+        new_part = bo.newPartition(size=part_size, parents=[disk_obj], fmt_type = disk_format, partType = type_of_part)
+    log_stage.debug("new_part: {}".format(new_part))
     bo.createDevice(new_part)
     blivet.partitioning.doPartitioning(bo)
+    bo.doIt()
+
+def get_disk_size(log_stage, bo, disk_obj):
+    pass
