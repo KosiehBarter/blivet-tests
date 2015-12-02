@@ -31,6 +31,7 @@ def main_execution(
         loginst.info("Test suite ran with -update switch - BEGINING UPDATE PROCEDURE. REVERTING to {}".format(machine_snap_name))
         virtual_machine.revert_machine(machine_name, machine_snap_name, loginst)
         virtual_machine.remove_snapshot(machine_name, machine_snap_name, loginst)
+        virtual_machine.copy_files(deps_list, machine_name, machine_copy_path, loginst, True)
         virtual_machine.start_machine(machine_name)
         loginst.info("Machine started, begining update procedure. Machine will be shut down automatically")
         virtual_machine.wait_for_shutdown(machine_name)
