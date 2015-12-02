@@ -1,9 +1,11 @@
-### Test - stage 5
+### Test - stage 12
 ### Part of: Blivet test collection
 ### Author: kvalek@redhat.com
 ### This program is under GPL licence.
 import classes
 import test_utils
+import blivet_utils
+import parted
 
 def main(disk):
 
@@ -27,16 +29,14 @@ def main(disk):
         list_of_ia = []
 
         ## Perform test
-        for inc in range(4):
-            log_stage.debug("Creating new partition for disk {}, partition {}".format(disk, inc + 1))
-            if inc == 3:
-                test_utils.create_new_partition(disk, "primary", start, -1)
-            else:
-                test_utils.create_new_partition(disk, "primary", start, finish)
-                start = finish + 1
-                finish = start + 512
+        log_stage.info("Preparing disk:\t{}".format(disk))
+        bo = blivet_utils.init_blivet_basic()
+        bl_disk = bo.devicetree.getDeviceByName(disk)
+        blivet_utils.create_disk_label(bo, bl_disk, "msdos")
 
-            test_utils.format_new_partition("{}{}".format(disk, inc + 1), "ext4")
+        for inc in range(4):
+            log_stage.info("Preparing Blivet partition {} on disk {}".format(inc + 1, disk))
+            blivet_utils.create_partition(log_stage, bo, bl_disk, 524288000, "ext4", parted.PARTITION_NORMAL) ## TODO: Fix free space
 
             ## init objects
             log_stage.info("Fetching system scan of disk:\t{}".format("{}{}".format(disk, inc + 1)))

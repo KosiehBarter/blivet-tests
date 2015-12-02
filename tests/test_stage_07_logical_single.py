@@ -17,15 +17,6 @@ def main(disk):
     try:
         test_utils.create_new_alloc_table(disk)
 
-        ## Multi partition test
-        start = 1
-        finish = 512 + start
-
-        ## Test partitions
-        list_of_tests = []
-        list_of_blivet = []
-        list_of_ia = []
-
         log_stage.info("Preparing disk {}".format(disk))
         test_utils.create_new_partition(disk, "extended", start, -1)
         test_utils.create_new_partition(disk, "logical", start + 1, -1)
@@ -37,7 +28,7 @@ def main(disk):
         test_blivet = classes.BlivetInitialization(disk, 2).child
 
         log_stage.info("Comparing objects.")
-        ia = test_utils.test(test_system, test_blivet)
+        ia = test_utils.test(test_system, test_blivet, log_stage)
 
         log_stage.info("Writting issues.")
         test_utils.write_issues(ia, "Single logical partition", stage_num)

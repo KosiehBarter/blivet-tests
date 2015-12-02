@@ -1,10 +1,11 @@
-### Test - stage 9
+### Test - stage 14
 ### Part of: Blivet test collection
 ### Author: kvalek@redhat.com
 ### This program is under GPL licence.
 import classes
 import test_utils
 import blivet_utils
+import parted
 
 def main(disk):
 
@@ -21,17 +22,23 @@ def main(disk):
         bl_disk = bo.devicetree.getDeviceByName(disk)
         blivet_utils.create_disk_label(bo, bl_disk, "msdos")
 
-        log_stage.info("Fetching system scan of disk:\t{}".format(disk))
-        test_system = classes.SystemDisk_Scan(disk)
+        log_stage.info("Creating and commiting partition creation on {}".format(disk))
+        blivet_utils.create_partition(log_stage, bo, bl_disk, 2048000000, type_of_part = parted.PARTITION_EXTENDED) ## TODO: Fix free space
+        log_stage.info("Creating and commiting logical partition on {}".format(disk))
+        blivet_utils.create_partition(log_stage, bo, bl_disk, 204800000, type_of_part = parted.PARTITION_LOGICAL) ## TODO: Fix free space
 
-        log_stage.info("Fetching blivet scan of disk:\t{}".format(disk))
-        test_blivet = classes.BlivetInitialization(disk).disk
+        log_stage.info("Fetching system scan for logical partition on disk {}".format(disk))
+        test_system = classes.SystemLogical_Scan(disk, 1, 5)
+
+        log_stage.info("Fetching Blivet scan for logical partition on disk {}".format(disk))
+        test_blivet = classes.BlivetInitialization(disk, 2).child
 
         log_stage.info("Comparing objects.")
         ia = test_utils.test(test_system, test_blivet, log_stage)
 
         log_stage.info("Writting issues.")
-        test_utils.write_issues(ia, "Basic disk - Blivet", stage_num)
+        test_utils.write_issues(ia, "Single logical partition", stage_num)
+
     except Exception as error_mess:
         log_stage.exception(error_mess)
 

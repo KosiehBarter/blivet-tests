@@ -22,7 +22,7 @@ def main(disk):
         test_blivet = classes.BlivetInitialization(disk).disk
 
         log_stage.info("Comparing objects.")
-        ia = test_utils.test(test_system, test_blivet)
+        ia = test_utils.test(test_system, test_blivet, log_stage)
 
         log_stage.info("Writting issues.")
         test_utils.write_issues(ia, "Basic disk", stage_num)

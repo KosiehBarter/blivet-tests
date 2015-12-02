@@ -1,4 +1,4 @@
-### Test - stage 9
+### Test - stage 10
 ### Part of: Blivet test collection
 ### Author: kvalek@redhat.com
 ### This program is under GPL licence.
@@ -22,16 +22,16 @@ def main(disk):
         blivet_utils.create_disk_label(bo, bl_disk, "msdos")
 
         log_stage.info("Creating and commiting partition creation on {}".format(disk))
-        blivet_utils.create_partition(log_stage, bo, bl_disk)
+        blivet_utils.create_partition(log_stage, bo, bl_disk, 2048000000) ## TODO: Fix free space
 
         log_stage.info("Fetching system scan of disk:\t{}".format(disk))
-        test_system = classes.SystemDisk_Scan(disk)
+        test_system = classes.SystemPartition_Scan(disk, 1)
 
         log_stage.info("Fetching blivet scan of disk:\t{}".format(disk))
-        test_blivet = classes.BlivetInitialization(disk).disk
+        test_blivet = classes.BlivetInitialization(disk, 1).child
 
         log_stage.info("Comparing objects.")
-        ia = test_utils.test(test_system, test_blivet)
+        ia = test_utils.test(test_system, test_blivet, log_stage)
 
         log_stage.info("Writting issues.")
         test_utils.write_issues(ia, "Single partition - Blivet", stage_num)

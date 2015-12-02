@@ -26,7 +26,7 @@ def main(disk):
         test_blivet_partition = classes.BlivetInitialization(disk, 1).child
 
         log_stage.info("Comparing objects.")
-        ia = test_utils.test(test_system_partition, test_blivet_partition)
+        ia = test_utils.test(test_system_partition, test_blivet_partition, log_stage)
 
         log_stage.info("Writting issues.")
         test_utils.write_issues(ia, "Partitioned disk", stage_num)
