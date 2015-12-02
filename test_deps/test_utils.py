@@ -65,17 +65,21 @@ def write_issues(ia, action, stage):
 
 
 #### Main test
-def test(sys_scan, blv_scan):
+def test(sys_scan, blv_scan, log_stage):
     ia = []
 
     for inc in sys_scan.get_attributes():
         if  (type(inc) == str):
             val_sys = getattr(sys_scan, inc)
             val_blv = getattr(blv_scan, inc)
+            checker = inc
 
         elif(type(inc) == tuple):
             val_sys = getattr(sys_scan, inc[0])
             val_blv = getdeepattr(blv_scan, inc[1])
+            checker = inc[1]
+
+        log_stage.debug("{}:\tval_sys - val_blv:\t\t{} - {}".format(checker, val_sys, val_blv))
 
         if val_sys != val_blv:
             ia.append("FAIL:\t{} != {}".format(val_sys, val_blv))
@@ -161,6 +165,11 @@ def create_new_alloc_table(disk, table_type = "msdos"):
         sys.exit(out)
     else:
         return
+
+
+## Get specific data from fdisk
+def get_data_fdisk(disk, parse_index):
+    return subprocess.getoutput("fdisk -l | grep {}".format(disk)).split()[parse_index]
 
 
 ## Create a new partition
