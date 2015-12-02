@@ -17,6 +17,7 @@ def main(disk):
     try:
         test_utils.create_new_alloc_table(disk)
 
+        start = 1
         log_stage.info("Preparing disk {}".format(disk))
         test_utils.create_new_partition(disk, "extended", start, -1)
         test_utils.create_new_partition(disk, "logical", start + 1, -1)
