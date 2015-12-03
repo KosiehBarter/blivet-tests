@@ -66,7 +66,7 @@ class SystemDiskFormatted_Scan(SystemDisk_Scan):
         self.sc_dfor_uuid = test_utils.get_disk_props(self.sc_bare_name, 1)
 
     def get_attributes(self):
-        return [("sc_dfor_type", "format.partedDisk.type"), ("sc_dfor_uuid", "uuid")]
+        return [("sc_dfor_type", "format.partedDisk.type"), ("sc_dfor_uuid", "format.uuid")]
 
 
 class SystemPartition_Scan(SystemDiskFormatted_Scan):
@@ -111,7 +111,6 @@ class SystemExtended_Scan(SystemPartition_Scan):
         """
             :param str d_name: disk's name
             :param int part_num: partition number
-            :param int logical_override: override gathering data when SystemLogical_Scan is performed
         """
         super(SystemExtended_Scan, self).__init__(d_name, part_num)
         self.sc_ex_name = "{}{}".format(d_name, part_num)
@@ -123,14 +122,14 @@ class SystemExtended_Scan(SystemPartition_Scan):
         self.sc_ex_size = self.sc_bare_sec_siz * self.sc_ex_num_sec
 
     def get_attributes(self):
-        return [("sc_ex_name", "name"), ("sc_ex_uuid", "uuid"), ("sc_ex_bool", "isExtended"), ("sc_ex_num_sec", "partedPartition.geometry.length"), ("sc_ex_str_sec", "partedPartition.geometry.start"), ("sc_ex_end_sec", "partedPartition.geometry.end"), ("sc_ex_size", "size")]
+        return [("sc_ex_name", "name"), ("sc_ex_uuid", "format.uuid"), ("sc_ex_bool", "isExtended"), ("sc_ex_num_sec", "partedPartition.geometry.length"), ("sc_ex_str_sec", "partedPartition.geometry.start"), ("sc_ex_end_sec", "partedPartition.geometry.end"), ("sc_ex_size", "size")]
 
 
 class SystemLogical_Scan(SystemExtended_Scan):
     """ docstring"""
     def __init__(self, d_name, part_num, logical_p_num):
         """
-            :param
+            :param str d_name: disk's name
         """
         super(SystemLogical_Scan, self).__init__(d_name, part_num)
         self.sc_lv_name = "{}{}".format(d_name, logical_p_num)
@@ -142,4 +141,23 @@ class SystemLogical_Scan(SystemExtended_Scan):
         self.sc_lv_size = self.sc_bare_sec_siz * self.sc_lv_num_sec
 
     def get_attributes(self):
-        return [("sc_lv_name", "name"), ("sc_lv_uuid", "uuid"), ("sc_lv_num_sec", "partedPartition.geometry.length"), ("sc_lv_str_sec", "partedPartition.geometry.start"), ("sc_lv_end_sec", "partedPartition.geometry.end"), ("sc_lv_size", "size")]
+        return [("sc_lv_name", "name"), ("sc_lv_uuid", "format.uuid"), ("sc_lv_num_sec", "partedPartition.geometry.length"), ("sc_lv_str_sec", "partedPartition.geometry.start"), ("sc_lv_end_sec", "partedPartition.geometry.end"), ("sc_lv_size", "size")]
+
+
+class System_LVMBasic_Scan(SystemPartition_Scan):
+    """ docstring for System_LVMBasic_Scan"""
+    def __init__(self, disk, part_num):
+        """
+            :param str disk: disk's name
+            :param int part_num: number of partition
+        """
+        super(System_LVMBasic_Scan, self).__init__(disk, part_num)
+        self.sc_lvm_pv_name = "{}{}".format(disk, part_num)
+        self.sc_lvm_pv_uuid = test_utils.get_disk_props(self.sc_lvm_pv_name, 1)
+        self.sc_lvm_pv_part_uuid = test_utils.get_disk_props(self.sc_lvm_pv_name, 5)
+        self.sc_lvm_pv_bool = False
+        self.sc_lvm_pv_size = int(test_utils.cat_data("/sys/block/{}/{}/size".format(disk, self.sc_lvm_pv_name))) * self.sc_bare_sec_siz
+        self.sc_lvm_pv_type = test_utils.get_disk_props(self.sc_lvm_pv_name, 3)
+
+    def get_attributes(self):
+        return [(("sc_lvm_pv_name", "name"), ("sc_lvm_pv_uuid", "format.uuid"), ("sc_lvm_pv_size", "size"), ("sc_lvm_pv_type", "format.type"))]
