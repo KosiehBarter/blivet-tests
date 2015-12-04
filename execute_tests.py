@@ -51,7 +51,13 @@ def main_execution(
             virtual_machine.create_machine(machine_name, machine_full_path, disk_arg, machine_iso_full_path,machine_ram, machine_ks_full_path, machine_snap_name, loginst)
             loginst.info("Creating snapshot {} for {}".format(machine_snap_name, machine_name))
             virtual_machine.create_snapshot(machine_name, machine_snap_name, loginst)
+            virtual_machine.create_snapshot(machine_name, "{}-FALLBACK".format(machine_snap_name), loginst)
             sys.exit(0)
+
+
+    ## Special condition for -fallback
+    if action == "fallback":
+        virtual_machine.revert_machine(machine_name, "{}-FALLBACK".format(machine_snap_name), loginst)
 
 
     ## Normal tests will begin here.
@@ -131,6 +137,8 @@ if len(arg_array) != 1:
 
         elif arg_array[3] == "-install":
             ACTION = "install"
+        elif arg_array[3] == "-fallback":
+            ACTION = fallback
     except:
         print("No additional parameters set, will run all tests.")
 else:
