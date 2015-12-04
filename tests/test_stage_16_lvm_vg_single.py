@@ -19,7 +19,7 @@ def main(disk):
         log_stage.info("Preparing disk:\t{}".format(disk))
         test_utils.create_new_alloc_table(disk)
         test_utils.create_new_partition(disk, "primary", 1, -1)
-        test_utils.create_lphys_vol("{}{}".format(disk, 1))
+        test_utils.create_lphys_vol(disk, 1)
 
         log_stage.info("Fetching system scan of disk:\t{}".format(disk))
         test_system_partition = classes.SystemPartition_Scan(disk, 1)
