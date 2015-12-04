@@ -58,6 +58,7 @@ def main_execution(
     ## Special condition for -fallback
     if action == "fallback":
         virtual_machine.revert_machine(machine_name, "{}-FALLBACK".format(machine_snap_name), loginst)
+        sys.exit(0)
 
 
     ## Normal tests will begin here.
@@ -138,7 +139,7 @@ if len(arg_array) != 1:
         elif arg_array[3] == "-install":
             ACTION = "install"
         elif arg_array[3] == "-fallback":
-            ACTION = fallback
+            ACTION = "fallback"
     except:
         print("No additional parameters set, will run all tests.")
 else:
