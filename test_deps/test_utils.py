@@ -56,11 +56,25 @@ def get_stage_num(input_name):
 def write_issues(ia, action, stage):
     f = open("/root/TEST_RESULT_{}".format(stage), "w")
 
-    if ia != []:
-        for inc in ia:
-            f.write("{}\n".format(inc))
-    else:
-        f.write("{} CHECK OK\n".format(action))
+    control = 0
+
+    for inc in ia:
+        if type(inc) == list:
+            for enc in inc:
+                if enc != []:
+                    f.write("{}\n".format(inc))
+                    control = 1
+                else: control = 0
+        else:
+            if inc != []:
+                f.write("{}\n".format(inc))
+                control = 1
+            else:
+                control = 0
+
+    if control == 0:
+        f.write("Test stage {} - {} CHECK OK.".format(stage, action))
+
     f.close()
 
 
@@ -205,11 +219,20 @@ def assign_logical_number(d_name, part_num):
 ## LVM ###############################################################################
 ## Create physical volume
 def create_lphys_vol(disk, disk_number):
-    out = subprocess.call(["pvcreate", "/dev/{}{}".format(disk, disk_number)])
+    if type(disk) == str:
+        disk = "{}{}{}".format("/dev/", disk, disk_number)
+    else:
+        temp_list = []
+        for inc in disk:
+            temp_list.append("{}{}{}".format("/dev/", inc, disk_number))
+        disk = " ".join(temp_list)
+
+    out = subprocess.call(["pvcreate {}".format(disk)], shell=True)
     if out != 0:
         sys.exit(out)
     else:
         return
+
 
 ## Create volume group
 def create_lvol_grp(vgname, disk_array):
@@ -223,6 +246,7 @@ def create_lvol_grp(vgname, disk_array):
         if out != 0:
             sys.exit(out)
     return
+
 
 ## Create logical volume
 def create_lvol_lvl(lvname, lvsize, vgname, fixed = True):
