@@ -172,3 +172,24 @@ def wait_for_copyback(counter, machine_name, machine_copy_path, loginst, copybac
                 if wait_time >= TEST_LIMIT:
                     loginst.error("File failed to copy:\t\"{}\"".format(copyback_files[inc]))
                     break
+
+
+## Create a run_update.sh file.
+def create_update_script(machine_copy_path, upd_args):
+    """
+        param str machine_copy_path: a full path where files for copy reside
+        param list upd_args: a list of upgrade arguments gathered from INI
+    """
+    f = open("{}test_deps/run_update.sh".format(machine_copy_path), "w")
+    f.write("#!/bin/bash\n\n"
+            "cd /root\n\n"
+            "rm -rf ./*.py\n"
+            "rm -rf ./blivet\n\n"
+            "sleep 20\n\n"
+            "git clone \"{}\" {} --branch={} --depth={}\n"
+            "/usr/bin/python3 {}setup.py install\n\n"
+            "dnf upgrade -y\n\n"
+            "rm -rf ./run_test.sh && rm -rf ./run_update.sh\n\n"
+            "poweroff".format(upd_args[0], upd_args[2], upd_args[1], upd_args[3], upd_args[2]))
+    f.close()
+    subprocess.call(["chmod +x {}test_deps/run_update.sh".format(machine_copy_path)], shell=True)

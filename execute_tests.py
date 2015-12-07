@@ -163,6 +163,13 @@ MACHINE_KS_FULL_PATH = CONF_OBJECT['PATHS']['MachinePathToKickstart']
 MACHINE_ISO_FULL_PATH = CONF_OBJECT['PATHS']['MachinePathToIso']
 MACHINE_COPY_PATH = CONF_OBJECT['PATHS']['MachineCopySource']
 
+UPDATE_GH_URL = CONF_OBJECT['UPDATE']['GitHubURL']
+UPDATE_GH_BRANCH = CONF_OBJECT['UPDATE']['GitHubBranch']
+UPDATE_GH_DEST_DIR = CONF_OBJECT['UPDATE']['GitHubDestDir']
+UPDATE_GH_DEPTH_NUM = int(CONF_OBJECT['UPDATE']['GitHubDepthNum'])
+
+UPDATE_LIST = [UPDATE_GH_URL, UPDATE_GH_BRANCH, UPDATE_GH_DEST_DIR, UPDATE_GH_DEPTH_NUM]
+
 ## Special - start only
 if ACTION == "startonly":
     loginst.debug("RUNNING MACHINE IN INTERACTIVE MODE")
@@ -174,6 +181,8 @@ TEST_LIST, DEPS_LIST = virtual_machine.get_files(MACHINE_COPY_PATH, loginst, ACT
 
 if TEST_NUM > 0:
     TEST_LIST = [TEST_LIST[TEST_NUM - 1]]
+
+virtual_machine.create_update_script(MACHINE_COPY_PATH, UPDATE_LIST)
 
 ## Check, if folder for machine exists, if not, create it
 if subprocess.call(["ls {} > /dev/null".format(MACHINE_FULL_PATH)], shell=True) != 0:
