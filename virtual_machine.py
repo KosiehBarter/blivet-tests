@@ -180,16 +180,12 @@ def create_update_script(machine_copy_path, upd_args):
         param str machine_copy_path: a full path where files for copy reside
         param list upd_args: a list of upgrade arguments gathered from INI
     """
+    if upd_args[3] != 0:
+        content = "#!/bin/bash\n\ncd /root\nrm -rf ./*.py\nrm -rf ./blivet\n\nsleep 20\n\ndnf upgrade -y\n\ngit clone \"{}\" {} --branch={} --depth={}\ncd /root/blivet/\npython3 setup.py install\n\ncd /root/\nrm -rf ./run_test.sh && rm -rf ./run_update.sh\npoweroff".format(upd_args[0], upd_args[2], upd_args[1], upd_args[3])
+    else:
+        content = "#!/bin/bash\n\ncd /root\nrm -rf ./*.py\nrm -rf ./blivet\n\nsleep 20\n\ndnf upgrade -y\n\ngit clone \"{}\" {} --branch={}\ncd /root/blivet/\npython3 setup.py install\n\ncd /root/\nrm -rf ./run_test.sh && rm -rf ./run_update.sh\npoweroff".format(upd_args[0], upd_args[2], upd_args[1])
+
     f = open("{}test_deps/run_update.sh".format(machine_copy_path), "w")
-    f.write("#!/bin/bash\n\n"
-            "cd /root\n\n"
-            "rm -rf ./*.py\n"
-            "rm -rf ./blivet\n\n"
-            "sleep 20\n\n"
-            "git clone \"{}\" {} --branch={} --depth={}\n"
-            "/usr/bin/python3 {}setup.py install\n\n"
-            "dnf upgrade -y\n\n"
-            "rm -rf ./run_test.sh && rm -rf ./run_update.sh\n\n"
-            "poweroff".format(upd_args[0], upd_args[2], upd_args[1], upd_args[3], upd_args[2]))
+    f.write(content)
     f.close()
     subprocess.call(["chmod +x {}test_deps/run_update.sh".format(machine_copy_path)], shell=True)
